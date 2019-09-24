@@ -46,6 +46,7 @@ l2Norm = Norm(2)
 # Store (matching score, ID, kp, desc)
 queryList = []
 
+# Calculate the score of the target and each image
 for keyId in db.keys():
     if keyId == targetImageId:
         continue
@@ -59,8 +60,10 @@ for keyId in db.keys():
 
     queryList.append(query)
 
+# Sory by the score
 queryList.sort(reverse=model.sortSimilarityScoreReverse())
 
+# Output the top-k images
 for i in range(k):
     similarityScore, queryKeyId, queryFeature, similarityData = queryList[i]
 
