@@ -214,3 +214,20 @@ class ColorMoments(Model):
 
     def sortSimilarityScoreReverse(self):
         return False
+
+    def dimensionReduction(self, featureList, dimRed):
+        flatFeatureList = []
+
+        for feature in featureList:
+            flatFeature1 = np.reshape(feature[0], (1, -1))
+            flatFeature2 = np.reshape(feature[1], (1, -1))
+            flatFeature3 = np.reshape(feature[2], (1, -1))
+            flatFeatures = np.concatenate((flatFeature1, flatFeature2, flatFeature3), axis=1)
+
+            flatFeatureList.append(flatFeatures)
+
+        featureMatrix = np.concatenate(flatFeatureList)
+
+        return dimRed(featureMatrix)
+
+        

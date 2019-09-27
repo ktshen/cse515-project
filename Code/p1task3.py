@@ -3,40 +3,59 @@ from module.database import FilesystemDatabase
 from module.distance import Norm
 from pathlib import Path
 import cv2 as cv
-from models.sift import SIFT
-from models.cm import ColorMoments
-from models.lbp import LocalBP
-from models.hog import HOG
+from models import modelFactory
+import argparse
 
 if len(sys.argv) < 5:
     print(f"Usage: {sys.argv[0]} FILEPATH MODEL TABLE_NAME K")
     sys.exit(1)
 
-# Create database according to model and table name
-db = FilesystemDatabase(sys.argv[3].lower() + "_" + sys.argv[2].lower())
+parser = argparse.ArgumentParser(description="Phase 1 Task 2")
+parser.add_argument(
+    "-i",
+    "--input_filepath",
+    metavar="input_filepath",
+    type=str,
+    help="Input file path.",
+    required=True,
+)
+parser.add_argument(
+    "-m",
+    "--model",
+    metavar="model",
+    type=str,
+    help="The model will be used.",
+    required=True,
+)
+parser.add_argument("-k", "--topk", metavar="topk", type=int, help="K.", required=True)
+parser.add_argument(
+    "-t",
+    "--table",
+    metavar="table",
+    type=str,
+    help="The table will be used.",
+    required=True,
+)
 
-if sys.argv[2].lower() == "sift":
-    # SIFT
-    model = SIFT()
-elif sys.argv[2].lower() == "cm":
-    # Color Moments
-    model = ColorMoments()
-elif sys.argv[2].lower() == "lbp":
-    # Local BP
-    model = LocalBP()
-elif sys.argv[2].lower() == "hog":
-    # HOG
-    model = HOG()
-else:
-    print("The model can only be CM or SIFT.")
-    sys.exit(0)
+args = parser.parse_args()
+
+# extract argument
+model = args.model.lower()
+table = args.table.lower()
+topk = args.topk
+
+# Create database according to model and table name
+db = FilesystemDatabase(f"{table}_{model}")
+
+# Create model
+model = modelFactory.creatModel(model)
 
 # The target image
-imgPath = Path(sys.argv[1])
+imgPath = Path(args.input_filepath)
 imgFolderPath = imgPath.parent
 targetImageId = imgPath.stem
 targetImg = cv.imread(str(imgPath))
-k = int(sys.argv[4])
+k = int(args.topk)
 
 targetFeature = model.deserializeFeature(db.getData(targetImageId))
 

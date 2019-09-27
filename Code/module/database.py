@@ -35,7 +35,7 @@ class Database(ABC):
 
 # To store all data as pickle file.
 class FilesystemDatabase(Database):
-    def __init__(self, tableId):
+    def __init__(self, tableId, create=False):
         super(Database, FilesystemDatabase).__init__(self)
         DEFAULT_DB_PATH = Path("FileDB")
         self._destPath = DEFAULT_DB_PATH / tableId
@@ -43,6 +43,8 @@ class FilesystemDatabase(Database):
         if os.path.exists(self._destPath):
             if not os.path.isdir(self._destPath):
                 raise Exception(f"{self._destPath} exists but not a directory!")
+        elif not create:
+            raise Exception(f"{self._destPath} does not exists and we cannot create it for you.")
         else:
             self._destPath.mkdir(parents=True, exist_ok=True)
 

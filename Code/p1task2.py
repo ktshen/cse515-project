@@ -3,38 +3,52 @@ import sys
 import os
 import cv2 as cv
 from module.database import FilesystemDatabase
-from models.sift import SIFT
-from models.cm import ColorMoments
-from models.lbp import LocalBP
-from models.hog import HOG
+from models import modelFactory
+import argparse
 
+parser = argparse.ArgumentParser(description="Phase 1 Task 2")
+parser.add_argument(
+    "-i",
+    "--input_path",
+    metavar="input_path",
+    type=str,
+    help="Input folder.",
+    required=True,
+)
+parser.add_argument(
+    "-m",
+    "--model",
+    metavar="model",
+    type=str,
+    help="The model will be used.",
+    required=True,
+)
+parser.add_argument(
+    "-t",
+    "--table",
+    metavar="table",
+    type=str,
+    help="The table will be used.",
+    required=True,
+)
 
-if len(sys.argv) < 4:
-    print(f"Usage: {sys.argv[0]} INPUT_DIR MODEL TABLE_NAME")
-    sys.exit(1)
+args = parser.parse_args()
 
-if sys.argv[2].lower() == "sift":
-    # SIFT
-    model = SIFT()
-elif sys.argv[2].lower() == "cm":
-    # Color Moments
-    model = ColorMoments()
-elif sys.argv[2].lower() == "lbp":
-    # LocalBP
-    model = LocalBP()
-elif sys.argv[2].lower() == "hog":
-    # HOG
-    model = HOG()
-else:
-    print(f"Please assign model: sift or cm")
-    sys.exit(1)
+inputPath = Path(args.input_path)
+modelName = args.model.lower()
+table = args.table.lower()
 
 # Create filesystem database with SIFT
-db = FilesystemDatabase(f"{sys.argv[3]}_{sys.argv[2].lower()}")
+db = FilesystemDatabase(f"{table}_{modelName}", create=True)
+
+model = modelFactory.creatModel(modelName)
+
+# Remove unuse variable in case misusing.
+del modelName
+del table
 
 SUPPORT_FILE_TYPES = [".jpg"]
 
-inputPath = Path(sys.argv[1])
 allFiles = []
 
 for fileName in os.listdir(inputPath):
