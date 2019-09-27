@@ -5,7 +5,7 @@
 
 #### Task 1 example:
 Note: Please run phase 1 task 2 first so that can decrease the time to get image features.
-TODO: We need to confirm whether we can use phase task 2 to build database before phase 2 demo.
+TODO: We need to confirm whether we can use phase 1 task 2 to build database before phase 2 demo.
 
 Using model color moments, load "test" table, topk is 5, and the method of dimension reduction is svd.
 ```Shell
