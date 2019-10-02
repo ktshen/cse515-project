@@ -155,6 +155,9 @@ class SIFT(Model):
     def sortSimilarityScoreReverse(self):
         return True
 
+    def dimensionReduction(self, featureList, dimRed, k=None):
+        pass
+
 
 if __name__ == "__main__":
     import sys

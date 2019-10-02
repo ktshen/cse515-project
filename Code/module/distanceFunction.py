@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 
-class distance(ABC):
+class distanceFunction(ABC):
     @abstractmethod
     def __init__(self):
         pass
@@ -11,8 +11,21 @@ class distance(ABC):
     def __call__(self, data1, data2):
         pass
 
+    @staticmethod
+    def createDistance(method, **kwargs):
+        # Add new method here
+        methods = {"l2", "l1"}
 
-class Norm(distance):
+        if method.lower() in methods:
+            if method.lower() == "l2":
+                return Norm(2)
+            elif method.lower() == "l1":
+                return Norm(1)
+        else:
+            raise Exception("Not supported distance function method.")
+
+
+class Norm(distanceFunction):
     def __init__(self, ord):
         self._ord = ord
 

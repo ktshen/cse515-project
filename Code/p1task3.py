@@ -1,6 +1,6 @@
 import sys
 from module.database import FilesystemDatabase
-from module.distance import Norm
+from module.distanceFunction import distanceFunction
 from pathlib import Path
 import cv2 as cv
 from models import modelFactory
@@ -60,7 +60,7 @@ k = int(args.topk)
 targetFeature = model.deserializeFeature(db.getData(targetImageId))
 
 # Distance function
-l2Norm = Norm(2)
+l2Norm = distanceFunction.createDistance("l2")
 
 # Store (matching score, ID, kp, desc)
 queryList = []

@@ -86,3 +86,6 @@ class LocalBP(Model):
 
     def sortSimilarityScoreReverse(self):
         pass
+
+    def dimensionReduction(self, featureList, dimRed, k=None):
+        pass

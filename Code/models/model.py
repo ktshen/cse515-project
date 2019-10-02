@@ -39,3 +39,7 @@ class Model(ABC):
     @abstractmethod
     def sortSimilarityScoreReverse(self):
         pass
+
+    @abstractmethod
+    def dimensionReduction(self, featureList, dimRed, k=None):
+        pass
