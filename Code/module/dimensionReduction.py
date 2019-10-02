@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.decomposition import PCA as SKPCA
-import sys
 from abc import ABC, abstractmethod
 
 
@@ -37,7 +36,7 @@ class SVD(DimReduction):
         if k is not None:
             U, s, V = U[:, :k], np.diag(s[:k]), V[:k, :]
 
-        return U, s, V
+        return (U, s)
 
 
 class PCA(DimReduction):
@@ -47,11 +46,11 @@ class PCA(DimReduction):
     def __call__(self, data, k=None):
         # data is a matrix. Each row represent feature vector.
         k = self._topK if k is None else k
-        pca = SKPCA(n_components = k).fit(data)
-        data_Transform = pca.transform(data)
+        pca = SKPCA(n_components=k).fit(data)
+        dataTransform = pca.transform(data)
         s = np.diag(pca.explained_variance_)
         V = pca.components_
         U = V.T
         C = pca.get_covariance()
-        
-        return U, s, V
+
+        return (dataTransform, s)

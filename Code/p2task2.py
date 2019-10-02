@@ -103,11 +103,11 @@ for keyId in db.keys():
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
     imageIdList.append(keyId)
 
-U, s, V = model.dimensionReduction(featuresList, method)
+dataTransform, _ = model.dimensionReduction(featuresList, method)
 
 # TODO: Use U only or UsV?
 # resultMatrix = np.dot(U, np.dot(s, V))
-resultMatrix = U
+resultMatrix = dataTransform
 
 targetFeature = resultMatrix[0]
 

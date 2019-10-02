@@ -56,7 +56,7 @@ featuresList = []
 for keyId in db.keys():
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
 
-U, s, V = model.dimensionReduction(featuresList, method)
+_, termWeight = model.dimensionReduction(featuresList, method)
 
 # TODO: How to print the original latent vector
-print(s)
+print(termWeight)
