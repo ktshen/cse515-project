@@ -1,7 +1,7 @@
 from .model import Model
 import cv2
-
-
+import numpy as np
+import math
 class SIFT(Model):
     KEYPOINTS = "keypoints"
     DESCRIPTORS = "descriptors"
@@ -156,8 +156,31 @@ class SIFT(Model):
         return True
 
     def dimensionReduction(self, featureList, dimRed, k=None):
-        pass
+        ffList = []
+        for i,feature in enumerate(featureList):
+            finalList = []
+            temp_list = np.array(np.zeros((12, 16)), dtype=list)
+            for i in range(0, 12):
+                for j in range(0, 16):
+                    temp_list[i][j] = [np.zeros((128,)), 0]
 
+
+            for kp,des in zip(feature['keypoints'],feature['descriptors']):
+                cord_x = math.floor(kp.pt[0]/100)
+                cord_y = math.floor(kp.pt[1]/100)
+                temp_list[cord_y,cord_x][0]+=np.array(des)
+                temp_list[cord_y, cord_x][1]+=1
+            for i in range(12):
+                for j in range(16):
+                    if temp_list[i][j][1] == 0:
+                        finalList.append(temp_list[i][j][0])
+                    else:
+                        finalList.append(temp_list[i][j][0] / temp_list[i][j][1])
+            ffList.append(finalList)
+
+
+        finalMatrix = np.array(ffList).reshape(33,192*128)
+        return dimRed(finalMatrix)
 
 if __name__ == "__main__":
     import sys

@@ -1,6 +1,6 @@
 import sys
 from module.database import FilesystemDatabase
-from module.distance import Norm
+from module.distanceFunction import Norm
 from module.dimensionReduction import DimReduction
 from pathlib import Path
 import cv2
