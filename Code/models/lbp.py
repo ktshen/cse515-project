@@ -97,4 +97,11 @@ class LocalBP(Model):
         pass
 
     def dimensionReduction(self, featureList, dimRed, k=None):
-        pass
+        flatFeatureList = []
+
+        for feature in featureList:
+            flatFeatureList.append(feature.ravel())
+
+        featureMatrix = np.array(flatFeatureList)
+
+        return dimRed(featureMatrix, k)

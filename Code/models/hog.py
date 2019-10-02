@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from .model import Model
 
 
@@ -73,4 +74,11 @@ class HOG(Model):
         pass
 
     def dimensionReduction(self, featureList, dimRed, k=None):
-        pass
+        flatFeatureList = []
+
+        for feature in featureList:
+            flatFeatureList.append(feature.ravel())
+
+        featureMatrix = np.array(flatFeatureList)
+
+        return dimRed(featureMatrix, k)
