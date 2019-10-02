@@ -47,7 +47,7 @@ db = FilesystemDatabase(f"{table}_{model}", create=False)
 model = modelFactory.creatModel(model)
 method = DimReduction.createReduction(method, k=topk)
 
-# Removed unsed variable in case misusing.
+# Removed unused variable in case misusing.
 del table
 
 featuresList = []

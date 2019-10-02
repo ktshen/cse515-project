@@ -1,7 +1,4 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage.feature import local_binary_pattern
 from .model import Model
 
 
@@ -16,7 +13,6 @@ class HOG(Model):
         self._isSign = isSign
         self._l2HysThreshold = l2HysThreshold
         self._downSample = downSample
-        # sekf._hog = cv2.HOGDescriptor()
 
     def extractFeatures(self, img):
         height, width = img.shape[:2]
@@ -36,7 +32,7 @@ class HOG(Model):
         )
 
         vector = (
-            hog.comput(scaledImage)
+            hog.compute(scaledImage)
             .ravel()
             .reshape(
                 (width // self._downSample - self._blockSize) // self._blockStride + 1,
@@ -54,13 +50,19 @@ class HOG(Model):
         pass
 
     def serializeFeature(self, featuresData):
-        pass
+        return featuresData
 
     def deserializeFeature(self, data):
-        pass
+        return data
 
     def visualizeFeatures(self, img, feature):
-        pass
+        print("Notice: the blocks are showed in the UP-DOWN then LEFT-RIGHT form")
+        for i in range(0, len(feature)):
+            for j in range(0, len(feature[i])):
+                print("block " + str((i, j)))
+                print(feature[i][j])
+                
+        return img
 
     def visualizeSimilarityResult(
         self, img1, features1, img2, features2, similarityData, rank=0, score=0
