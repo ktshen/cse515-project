@@ -24,6 +24,42 @@ Using color moments, load "test" table, topk is 10, the method of dimension redu
 python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset 
 ```
 
+#### Task 3 example:
+Note: Please run phase 1 task 2 first to build database.
+TODO: We need to confirm if task 3 is combination of task 1 with label.
+
+In this task, I added two argument: -meta for metadata path and -l for label.
+
+Metadata can be downloaded from the following link. Please download **csv** file.
+
+[https://sites.google.com/view/11khands](https://sites.google.com/view/11khands)
+
+(*.csv) [download](https://drive.google.com/open?id=1RC86-rVOR8c93XAfM9b9R45L7C2B0FdA) (759 KB)
+
+According to project specification, we need to process 8 types of label. Please use ***one character followed** by -l to indicate what label you want.
+
+- l -> left-hand
+- r -> right-hand
+- d -> dorsal
+- p -> palmar
+- a -> accessories
+- m -> male
+- f -> female
+
+The following example is to process images which are left-hand.
+
+```Shell
+python p2task3.py -m cm -t test -k 5 -d svd -meta ~/hw/cse515_data/HandInfo.csv -l l
+```
+
+#### Task 4 example:
+
+Task 4 is very similar to task 2. But we add some arguments to find some images with specific label from metadata.
+
+```Shell
+python p2task4.py -m cm -t test -k 5 -d svd -meta ~/hw/cse515_data/HandInfo.csv -l l -mi 5 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset -i Hand_0008110
+```
+
 ## Phase 1
 
 #### Task 1 example:

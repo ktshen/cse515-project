@@ -26,7 +26,7 @@ metadata_labels = [
     ("d", "dorsal"),
     ("p", "palmar"),
     ("a", "accessories"),
-    ("na", "no_accessories"),
+    ("n", "no_accessories"),
     ("m", "male"),
     ("f", "female"),
 ]
