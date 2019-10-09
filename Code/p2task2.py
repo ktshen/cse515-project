@@ -65,7 +65,7 @@ args = parser.parse_args()
 model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
-method = args.method.lower()
+decompMethod = args.method.lower()
 target = args.image_id
 distFunction = args.distance.lower()
 topm = args.topm
@@ -73,53 +73,48 @@ imagePath = Path(args.image_path)
 
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{model}", create=False)
+# Create database to store decomposition data
+decompDb = FilesystemDatabase(f"{table}_{model}_decomp", create=True)
+
+# Create model, decomposition function, and distance function
 model = modelFactory.creatModel(model)
-method = DimReduction.createReduction(method, k=topk)
+decompFunction = DimReduction.createReduction(decompMethod, k=topk)
+distance = distanceFunction.createDistance(distFunction)
+
+# Get decomposition data
+decompData = decompDb.getData(f"{decompMethod}")
+
+if not decompData:
+    raise Exception("Cannot find {decompMethod}, please execute p2task1 first.")
+    sys.exit(1)
+
 
 # The imageIdList and featureList should could be mapped to each other.
-featuresList = []
 imageIdList = []
-
-# Get target image feature
-targetFeature = model.deserializeFeature(db.getData(target))
-
-# Make the feature of target image at first in the list.
-featuresList.append(targetFeature)
-imageIdList.append(target)
-
-if targetFeature is None:
-    print(f"Cannot find {target} in table {table}")
-    sys.exit(1)
+targetIdx = -1
 
 # Removed unsed variable in case misusing.
 del table
 
 # Load features of images
-for keyId in db.keys():
+for idx, keyId in enumerate(db.keys()):
     if target == keyId:
-        continue
-    featuresList.append(model.deserializeFeature(db.getData(keyId)))
+        targetIdx = idx
     imageIdList.append(keyId)
 
-dataTransform, _ = model.dimensionReduction(featuresList, method)
-
-# TODO: Use U only or UsV?
-# resultMatrix = np.dot(U, np.dot(s, V))
-resultMatrix = dataTransform
-
-# We always put target feature in first row.
-targetFeature = resultMatrix[0]
-
-distance = distanceFunction.createDistance(distFunction)
-
-# Removed unused variable in case misusing
-del featuresList
+# Get data transform(??? I think it should not be called data transform)
+# TODO: We have to ensure whether the file idx could be directly map to the data transform matrix.
+resultMatrix = decompFunction.getDataTransform(decompData)
+targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)
 distanceScoreList = []
 
-# Because the first one(index: 0) is target, the range would be [1: length).
-for featureIdx in range(1, resultMatrix.shape[0]):
+for featureIdx in range(0, resultMatrix.shape[0]):
+    # target image, skip
+    if featureIdx == targetIdx:
+        continue
+
     distanceScore = distance(targetFeature, resultMatrix[featureIdx])
 
     # Put score as first element of tuple so that we can make the score as key to sort this list.

@@ -218,15 +218,19 @@ class ColorMoments(Model):
     def dimensionReduction(self, featureList, dimRed, k=None):
         flatFeatureList = []
 
-        for feature in featureList:
-            flatFeature1 = np.reshape(feature[0], (1, -1))
-            flatFeature2 = np.reshape(feature[1], (1, -1))
-            flatFeature3 = np.reshape(feature[2], (1, -1))
-            flatFeatures = np.concatenate((flatFeature1, flatFeature2, flatFeature3), axis=1)
+        if type(dimRed).__name__ == "LDA":
+            print("LDA!!!!!!!!")
+            pass
+        else:
+            for feature in featureList:
+                flatFeature1 = np.reshape(feature[0], (1, -1))
+                flatFeature2 = np.reshape(feature[1], (1, -1))
+                flatFeature3 = np.reshape(feature[2], (1, -1))
+                flatFeatures = np.concatenate((flatFeature1, flatFeature2, flatFeature3), axis=1)
 
-            flatFeatureList.append(flatFeatures)
+                flatFeatureList.append(flatFeatures)
 
-        featureMatrix = np.concatenate(flatFeatureList)
+            featureMatrix = np.concatenate(flatFeatureList)
 
         return dimRed(featureMatrix, k)
 

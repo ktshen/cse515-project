@@ -13,6 +13,18 @@ class DimReduction(ABC):
     def __call__(self, data1, data2):
         pass
 
+    @abstractmethod
+    def getTermWeight(self, data, topk):
+        pass
+
+    @abstractmethod
+    def projectFeature(self, feature, data, topk):
+        pass
+
+    @abstractmethod
+    def getDataTransform(self, data, topk):
+        pass
+
     @staticmethod
     def createReduction(method, **kwargs):
         # Add new method here
@@ -34,10 +46,17 @@ class SVD(DimReduction):
 
         U, s, V = np.linalg.svd(data, full_matrices=False)
 
-        if k is not None:
-            U, s, V = U[:, :k], np.diag(s[:k]), V[:k, :]
+        return (U, s, V)
 
-        return (U, s)
+    def getTermWeight(self, data, topk):
+        _, s, _ = data
+        return np.diag(s[: topk])
+
+    def projectFeature(self, feature, data, topk):
+        pass
+
+    def getDataTransform(self, data, topk):
+        return data[0]
 
 
 class PCA(DimReduction):
@@ -56,6 +75,15 @@ class PCA(DimReduction):
 
         return (dataTransform, s)
 
+    def getTermWeight(self, data, topk):
+        pass
+
+    def projectFeature(self, feature, data, topk):
+        pass
+
+    def getDataTransform(self, data, topk):
+        pass
+
 
 class LDA(DimReduction):
     def __init__(self, k=None):
@@ -68,5 +96,14 @@ class LDA(DimReduction):
         dataTransform = lda.transform(data)
         feature = lda.components_
         weight = lda.exp_dirichlet_component_
-        
+
         return (dataTransform, weight)
+
+    def getTermWeight(self, data, topk):
+        pass
+
+    def projectFeature(self, feature, data, topk):
+        pass
+
+    def getDataTransform(self, data, topk):
+        pass
