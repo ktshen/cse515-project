@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.decomposition import PCA as SKPCA
+from sklearn.decomposition import LatentDirichletAllocation as SKLDA
 from abc import ABC, abstractmethod
 
 
@@ -15,7 +16,7 @@ class DimReduction(ABC):
     @staticmethod
     def createReduction(method, **kwargs):
         # Add new method here
-        methods = {"svd": SVD, "pca": PCA}
+        methods = {"svd": SVD, "pca": PCA, "lda": LDA}
 
         if method.lower() in methods:
             return methods[method](**kwargs)
@@ -54,3 +55,18 @@ class PCA(DimReduction):
         C = pca.get_covariance()
 
         return (dataTransform, s)
+
+
+class LDA(DimReduction):
+    def __init__(self, k=None):
+        self._topK = k
+
+    def __call__(self, data, k=None):
+        # data is a matrix. Each row represent feature vector.
+        k = self._topK if k is None else k
+        lda = SKLDA(n_components=k, n_jobs=-1).fit(data)
+        dataTransform = lda.transform(data)
+        feature = lda.components_
+        weight = lda.exp_dirichlet_component_
+        
+        return (dataTransform, weight)
