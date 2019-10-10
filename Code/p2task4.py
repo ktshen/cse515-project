@@ -90,7 +90,7 @@ args = parser.parse_args()
 model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
-method = args.method.lower()
+decompMethod = args.method.lower()
 target = args.image_id
 distFunction = args.distance.lower()
 topm = args.topm
@@ -104,58 +104,43 @@ filteredFilelist = getFilelistByLabel(metadataPath, label)
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{model}", create=False)
 model = modelFactory.creatModel(model)
-method = DimReduction.createReduction(method, k=topk)
+decompFunction = DimReduction.createReduction(decompMethod, k=topk)
+distance = distanceFunction.createDistance(distFunction)
 
-# The imageIdList and featureList should could be mapped to each other.
+# The imageIdList and featureList should can be mapped to each other.
 featuresList = []
 imageIdList = []
-
-# Get target image feature
-targetFeature = model.deserializeFeature(db.getData(target))
-
-# Make the feature of target image at first in the list.
-featuresList.append(targetFeature)
-imageIdList.append(target)
-
-if targetFeature is None:
-    print(f"Cannot find {target} in table {table}")
-    sys.exit(1)
+targetIdx = -1
 
 # Removed unsed variable in case misusing.
 del table
 
 # Load features of images
 for keyId in filteredFilelist:
-    if target == keyId:
-        continue
-
     feature = db.getData(keyId)
 
     # Because the database may store subset dataset only.
     # Some keyId may not exsit in database and therefore the feature would be None.
     if feature is not None:
+        if keyId == target:
+            targetIdx = len(imageIdList)
         featuresList.append(model.deserializeFeature(feature))
         imageIdList.append(keyId)
 
-dataTransform, _ = model.dimensionReduction(featuresList, method)
+decompData = model.dimensionReduction(featuresList, decompFunction)
+resultMatrix = decompFunction.getObjLaten(decompData, topk)
 
-# TODO: Use U only or UsV?
-# resultMatrix = np.dot(U, np.dot(s, V))
-resultMatrix = dataTransform
-
-# We always put target feature in first row.
-targetFeature = resultMatrix[0]
-
-distance = distanceFunction.createDistance(distFunction)
-
-# Removed unused variable in case misusing
-del featuresList
+targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)
 distanceScoreList = []
 
 # Because the first one(index: 0) is target, the range would be [1: length).
-for featureIdx in range(1, resultMatrix.shape[0]):
+for featureIdx in range(resultMatrix.shape[0]):
+    # target image, skip
+    if featureIdx == targetIdx:
+        continue
+
     distanceScore = distance(targetFeature, resultMatrix[featureIdx])
 
     # Put score as first element of tuple so that we can make the score as key to sort this list.

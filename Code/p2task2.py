@@ -89,7 +89,7 @@ if not decompData:
     sys.exit(1)
 
 
-# The imageIdList and featureList should could be mapped to each other.
+# The imageIdList and featureList should can be mapped to each other.
 imageIdList = []
 targetIdx = -1
 
@@ -102,9 +102,8 @@ for idx, keyId in enumerate(db.keys()):
         targetIdx = idx
     imageIdList.append(keyId)
 
-# Get data transform(??? I think it should not be called data transform)
 # TODO: We have to ensure whether the file idx could be directly map to the data transform matrix.
-resultMatrix = decompFunction.getDataTransform(decompData)
+resultMatrix = decompFunction.getObjLaten(decompData, topk)
 targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)

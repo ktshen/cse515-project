@@ -22,7 +22,7 @@ class DimReduction(ABC):
         pass
 
     @abstractmethod
-    def getDataTransform(self, data, topk):
+    def getObjLaten(self, data, topk):
         pass
 
     @staticmethod
@@ -43,7 +43,6 @@ class SVD(DimReduction):
     def __call__(self, data, k=None):
         # data is a matrix. Each row represent feature vector.
         k = self._topK if k is None else k
-
         U, s, V = np.linalg.svd(data, full_matrices=False)
 
         return (U, s, V)
@@ -55,8 +54,8 @@ class SVD(DimReduction):
     def projectFeature(self, feature, data, topk):
         pass
 
-    def getDataTransform(self, data, topk):
-        return data[0]
+    def getObjLaten(self, data, topk):
+        return data[0][:, : topk]
 
 
 class PCA(DimReduction):
@@ -73,7 +72,7 @@ class PCA(DimReduction):
         U = V.T
         C = pca.get_covariance()
 
-        return (dataTransform, s)
+        return (dataTransform, s, V)
 
     def getTermWeight(self, data, topk):
         pass
@@ -81,8 +80,8 @@ class PCA(DimReduction):
     def projectFeature(self, feature, data, topk):
         pass
 
-    def getDataTransform(self, data, topk):
-        pass
+    def getObjLaten(self, data, topk):
+        return data[0]
 
 
 class LDA(DimReduction):
@@ -93,11 +92,11 @@ class LDA(DimReduction):
         # data is a matrix. Each row represent feature vector.
         k = self._topK if k is None else k
         lda = SKLDA(n_components=k, n_jobs=-1).fit(data)
-        dataTransform = lda.transform(data)
-        feature = lda.components_
-        weight = lda.exp_dirichlet_component_
+        picTop = lda.transform(data)
+        topFeature = lda.components_
+        # weight = lda.exp_dirichlet_component_
 
-        return (dataTransform, weight)
+        return (picTop, None, topFeature)
 
     def getTermWeight(self, data, topk):
         pass
@@ -105,5 +104,5 @@ class LDA(DimReduction):
     def projectFeature(self, feature, data, topk):
         pass
 
-    def getDataTransform(self, data, topk):
-        pass
+    def getObjLaten(self, data, topk):
+        return data[0]

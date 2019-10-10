@@ -49,15 +49,19 @@ decompFunction = DimReduction.createReduction(decompMethod, k=topk)
 # Removed unused variable in case misusing.
 del table
 
+idList = []
 featuresList = []
 
 # Load features of images
 for keyId in db.keys():
+    idList.append(keyId)
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
 
-# _, termWeight = model.dimensionReduction(featuresList, method)
 decompData = model.dimensionReduction(featuresList, decompFunction)
 decompDb.addData(f"{decompMethod}", decompData, overwrite=True)
 
 # TODO: How to print the original latent vector
-print(decompFunction.getTermWeight(decompData))
+objLaten = decompFunction.getObjLaten(decompData, topk)
+
+for picId, latn in zip(idList, objLaten):
+    print((picId, objLaten))
