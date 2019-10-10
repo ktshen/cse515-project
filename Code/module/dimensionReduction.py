@@ -37,7 +37,7 @@ class SVD(DimReduction):
         if k is not None:
             U, s, V = U[:, :k], np.diag(s[:k]), V[:k, :]
 
-        return (U, s)
+        return (U, s, V)
 
 
 class PCA(DimReduction):
@@ -54,7 +54,7 @@ class PCA(DimReduction):
         U = V.T
         C = pca.get_covariance()
 
-        return (dataTransform, s)
+        return (dataTransform, s, V)
 
 
 class LDA(DimReduction):
@@ -65,8 +65,7 @@ class LDA(DimReduction):
         # data is a matrix. Each row represent feature vector.
         k = self._topK if k is None else k
         lda = SKLDA(n_components=k, n_jobs=-1).fit(data)
-        dataTransform = lda.transform(data)
-        feature = lda.components_
-        weight = lda.exp_dirichlet_component_
+        pic_top = lda.transform(data)
+        top_feat = lda.components_
         
-        return (dataTransform, weight)
+        return (pic_top, None, top_feat)

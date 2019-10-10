@@ -50,13 +50,16 @@ method = DimReduction.createReduction(method, k=topk)
 # Removed unused variable in case misusing.
 del table
 
+idList = []
 featuresList = []
 
 # Load features of images
 for keyId in db.keys():
+    idList.append(keyId)
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
 
-_, termWeight = model.dimensionReduction(featuresList, method)
+obj_latn, weight, latn_feat = model.dimensionReduction(featuresList, method)
 
 # TODO: How to print the original latent vector
-print(termWeight)
+for pic_id, latn in zip(idList, obj_latn):
+    print((pic_id, latn))
