@@ -68,7 +68,7 @@ class NMF(DimReduction):
         nmf = NMF(n_components=k).fit(data)
         picTop = nmf.transform(data)
         topFeature = nmf.components_
-        # weight = lda.exp_dirichlet_component_
+        
 
         return [picTop, topFeature, k, data]
 
