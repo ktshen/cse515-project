@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA as SKPCA
 from sklearn.decomposition import LatentDirichletAllocation as SKLDA
+from sklearn.decomposition import NMF
 from abc import ABC, abstractmethod
 
 
@@ -28,7 +29,7 @@ class DimReduction(ABC):
     @staticmethod
     def createReduction(method, **kwargs):
         # Add new method here
-        methods = {"svd": SVD, "pca": PCA, "lda": LDA}
+        methods = {"svd": SVD, "pca": PCA, "lda": LDA, "nmf":NMF}
 
         if method.lower() in methods:
             return methods[method](**kwargs)
@@ -56,6 +57,40 @@ class SVD(DimReduction):
 
     def getObjLaten(self, data, topk):
         return data[0][:, : topk]
+
+class NMF(DimReduction):
+    def __init__(self, k=None):
+        self._topK = k
+
+    def __call__(self, data, k=None):
+        # data is a matrix. Each row represent feature vector.
+        k = self._topK if k is None else k
+        nmf = NMF(n_components=k).fit(data)
+        picTop = nmf.transform(data)
+        topFeature = nmf.components_
+        # weight = lda.exp_dirichlet_component_
+
+        return [picTop, topFeature, k, data]
+
+    def getTermWeight(self, data, topk):
+        if data[2] != topk:
+            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            data[0] = picTop
+            data[1] = topFeature
+            data[2] = topk
+        return data[0]
+
+    def projectFeature(self, feature , data, topk):
+        pass
+
+    def getObjLaten(self, data, topk):
+        if data[2] != topk:
+            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            data[0] = picTop
+            data[1] = topFeature
+            data[2] = topk
+        return data[1]
+
 
 
 class PCA(DimReduction):
