@@ -65,9 +65,9 @@ class PCA(DimReduction):
     def __call__(self, data, k=None):
         # data is a matrix. Each row represent feature vector.
         k = self._topK if k is None else k
-        pca = SKPCA(n_components=k).fit(data)
+        pca = SKPCA().fit(data)
         dataTransform = pca.transform(data)
-        s = np.diag(pca.explained_variance_)
+        s = pca.explained_variance_
         V = pca.components_
         U = V.T
         C = pca.get_covariance()
@@ -75,13 +75,18 @@ class PCA(DimReduction):
         return (dataTransform, s, V)
 
     def getTermWeight(self, data, topk):
+    #task 1,3
+        _, s, _ = data
+        return np.diag(s[:topk])
         pass
 
     def projectFeature(self, feature, data, topk):
+    #task 5
         pass
 
     def getObjLaten(self, data, topk):
-        return data[0]
+    #task 2,4
+        return data[0][:, :topk]
 
 
 class LDA(DimReduction):
@@ -96,13 +101,26 @@ class LDA(DimReduction):
         topFeature = lda.components_
         # weight = lda.exp_dirichlet_component_
 
-        return (picTop, None, topFeature)
+        return (picTop, topFeature, k, data)
 
     def getTermWeight(self, data, topk):
+        if data[2] != topk:
+            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            data = list(data)
+            data[0] = picTop
+            data[1] = topFeature
+            data[2] = topk
+        return data[1]
         pass
 
-    def projectFeature(self, feature, data, topk):
+    def projectFeature(self, feature , data, topk):
         pass
 
     def getObjLaten(self, data, topk):
+        if data[2] != topk:
+            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            data = list(data)
+            data[0] = picTop
+            data[1] = topFeature
+            data[2] = topk
         return data[0]
