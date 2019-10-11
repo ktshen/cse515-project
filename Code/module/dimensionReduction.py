@@ -101,17 +101,15 @@ class LDA(DimReduction):
         topFeature = lda.components_
         # weight = lda.exp_dirichlet_component_
 
-        return (picTop, topFeature, k, data)
+        return [picTop, topFeature, k, data]
 
     def getTermWeight(self, data, topk):
         if data[2] != topk:
             picTop, topFeature, topk, feature = self.__call__(data[3], topk)
-            data = list(data)
             data[0] = picTop
             data[1] = topFeature
             data[2] = topk
         return data[1]
-        pass
 
     def projectFeature(self, feature , data, topk):
         pass
@@ -119,7 +117,6 @@ class LDA(DimReduction):
     def getObjLaten(self, data, topk):
         if data[2] != topk:
             picTop, topFeature, topk, feature = self.__call__(data[3], topk)
-            data = list(data)
             data[0] = picTop
             data[1] = topFeature
             data[2] = topk
