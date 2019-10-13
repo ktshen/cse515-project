@@ -217,8 +217,9 @@ class ColorMoments(Model):
 
     def dimensionReduction(self, featureList, dimRed, k=None):
 
-        featureMatrix = []
         if type(dimRed).__name__ == "LDA":
+            featureMatrix = []
+
             for feature in featureList:
                 flat_mean_Y = np.reshape(feature[0][:,:,0],-1)
                 flat_mean_U = np.reshape(feature[0][:,:,1],-1)
@@ -314,6 +315,7 @@ class ColorMoments(Model):
             return dimRed(featureMatrix,k)
 
         else:
+            flatFeatureList =[]
             for feature in featureList:
                 flatFeature1 = np.reshape(feature[0], (1, -1))
                 flatFeature2 = np.reshape(feature[1], (1, -1))
