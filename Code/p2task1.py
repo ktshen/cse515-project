@@ -1,11 +1,6 @@
-import sys
 from module.database import FilesystemDatabase
-from module.distanceFunction import Norm
 from module.dimensionReduction import DimReduction
-from pathlib import Path
-import cv2
 from models import modelFactory
-import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 1")
@@ -40,23 +35,33 @@ args = parser.parse_args()
 model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
-method = args.method.lower()
+decompMethod = args.method.lower()
 
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{model}", create=False)
+
+# Create database to store decomposition data
+decompDb = FilesystemDatabase(f"{table}_{model}_decomp", create=True)
+
 model = modelFactory.creatModel(model)
-method = DimReduction.createReduction(method, k=topk)
+decompFunction = DimReduction.createReduction(decompMethod, k=topk)
 
 # Removed unused variable in case misusing.
 del table
 
+idList = []
 featuresList = []
 
 # Load features of images
 for keyId in db.keys():
+    idList.append(keyId)
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
 
-_, termWeight = model.dimensionReduction(featuresList, method)
+decompData = model.dimensionReduction(featuresList, decompFunction)
+decompDb.addData(f"{decompMethod}", decompData, overwrite=True)
 
 # TODO: How to print the original latent vector
-print(termWeight)
+objLaten = decompFunction.getObjLaten(decompData, topk)
+
+for picId, latn in zip(idList, objLaten):
+    print((picId, objLaten))

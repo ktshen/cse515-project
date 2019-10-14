@@ -69,7 +69,7 @@ args = parser.parse_args()
 model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
-method = args.method.lower()
+decompMethod = args.method.lower()
 distFunction = args.distance.lower()
 metadataPath = args.metadata
 label = args.label   # Used to filter such as left-hand or right-hand
@@ -81,10 +81,11 @@ filteredFilelist = getFilelistByLabel(metadataPath, label)
 db = FilesystemDatabase(f"{table}_{model}", create=False)
 
 model = modelFactory.creatModel(model)
-method = DimReduction.createReduction(method, k=topk)
+decompFunction = DimReduction.createReduction(decompMethod, k=topk)
 
 # The imageIdList and featureList should could be mapped to each other.
 featuresList = []
+imageIdList = []
 
 # Removed unsed variable in case misusing.
 del table
@@ -96,9 +97,12 @@ for keyId in filteredFilelist:
     # Because the database may store subset of the whole dataset.
     # Some keyId may not exsit in database.
     if feature is not None:
+        imageIdList.append(keyId)
         featuresList.append(model.deserializeFeature(feature))
 
-_, termWeight = model.dimensionReduction(featuresList, method)
+decompData = model.dimensionReduction(featuresList, decompFunction)
 
-# TODO: How to print the original latent vector
-print(termWeight)
+objLaten = decompFunction.getObjLaten(decompData, topk)
+
+for picId, latn in zip(imageIdList, objLaten):
+    print((picId, objLaten))
