@@ -58,6 +58,7 @@ for keyId in db.keys():
     featuresList.append(model.deserializeFeature(db.getData(keyId)))
 
 decompData = model.dimensionReduction(featuresList, decompFunction)
+
 decompDb.addData(f"{decompMethod}", decompData, overwrite=True)
 
 # TODO: How to print the original latent vector

@@ -84,7 +84,7 @@ class LocalBP(Model):
             for j in range(0, len(v[i])):
                 print("Sub-area " + str((i, j)))
                 print(v[i][j])
-                
+
 #         return feature.getLbp()
         return img
 
@@ -100,8 +100,11 @@ class LocalBP(Model):
         flatFeatureList = []
 
         for feature in featureList:
-            flatFeatureList.append(feature.ravel())
+            flatFeatureList.append(self.flattenFecture(feature))
 
         featureMatrix = np.array(flatFeatureList)
 
         return dimRed(featureMatrix, k)
+
+    def flattenFecture(self, feature, dimRedName):
+        return feature.ravel()

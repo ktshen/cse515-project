@@ -43,3 +43,7 @@ class Model(ABC):
     @abstractmethod
     def dimensionReduction(self, featureList, dimRed, k=None):
         pass
+
+    @abstractmethod
+    def flattenFecture(self, feature, dimRedName=None):
+        pass

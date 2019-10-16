@@ -2,6 +2,8 @@ from .model import Model
 import cv2
 import numpy as np
 import math
+
+
 class SIFT(Model):
     KEYPOINTS = "keypoints"
     DESCRIPTORS = "descriptors"
@@ -157,53 +159,30 @@ class SIFT(Model):
 
     def dimensionReduction(self, featureList, dimRed, k=None):
         ffList = []
-        for i,feature in enumerate(featureList):
-            finalList = []
-            temp_list = np.array(np.zeros((12, 16)), dtype=list)
-            for i in range(0, 12):
-                for j in range(0, 16):
-                    temp_list[i][j] = [np.zeros((128,)), 0]
+        for i, feature in enumerate(featureList):
+            ffList.append(self.flattenFecture(feature))
 
+        finalMatrix = np.array(ffList).reshape(-1, 192 * 128)
 
-            for kp,des in zip(feature['keypoints'],feature['descriptors']):
-                cord_x = math.floor(kp.pt[0]/100)
-                cord_y = math.floor(kp.pt[1]/100)
-                temp_list[cord_y,cord_x][0]+=np.array(des)
-                temp_list[cord_y, cord_x][1]+=1
-            for i in range(12):
-                for j in range(16):
-                    if temp_list[i][j][1] == 0:
-                        finalList.append(temp_list[i][j][0])
-                    else:
-                        finalList.append(temp_list[i][j][0] / temp_list[i][j][1])
-            ffList.append(finalList)
-
-
-        finalMatrix = np.array(ffList).reshape(33,192*128)
         return dimRed(finalMatrix)
 
-if __name__ == "__main__":
-    import sys
-    import distance
+    def flattenFecture(self, feature, dimRedName=None):
+        finalList = []
+        temp_list = np.array(np.zeros((12, 16)), dtype=list)
+        for i in range(0, 12):
+            for j in range(0, 16):
+                temp_list[i][j] = [np.zeros((128,)), 0]
 
-    cm = SIFT()
+        for kp, des in zip(feature["keypoints"], feature["descriptors"]):
+            cord_x = math.floor(kp.pt[0] / 100)
+            cord_y = math.floor(kp.pt[1] / 100)
+            temp_list[cord_y, cord_x][0] += np.array(des)
+            temp_list[cord_y, cord_x][1] += 1
+        for i in range(12):
+            for j in range(16):
+                if temp_list[i][j][1] == 0:
+                    finalList.append(temp_list[i][j][0])
+                else:
+                    finalList.append(temp_list[i][j][0] / temp_list[i][j][1])
 
-    img = cv2.imread(sys.argv[1])
-
-    img2 = cv2.imread(sys.argv[2])
-
-    feature1 = cm.extractFeatures(img)
-    feature2 = cm.extractFeatures(img2)
-
-    sim = cm.getSimilarity(feature1, feature2, distance.Norm(2))
-
-    # cv.imshow('image', mean / 255.0)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
-
-    # img3 = cm.visualizeSimilarityResult(img, feature1, img2, feature2, sim)
-    # img3 = cm.visualizeFeatures(img, feature1)
-    # cv2.imshow("image", img3)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # print(len(sim))
+        return finalList

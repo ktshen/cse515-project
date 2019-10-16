@@ -52,7 +52,9 @@ class SVD(DimReduction):
         return np.diag(s[:topk])
 
     def projectFeature(self, feature, data, topk):
-        pass
+        V = data[2]
+        V = V[:topk, :]
+        return np.dot(feature, V.T)
 
     def getObjLaten(self, data, topk):
         U = data[0]

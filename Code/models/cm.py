@@ -5,6 +5,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import math
 
+
 class ColorMoments(Model):
     def __init__(self, widthOfWindow=100, heightOfWindow=100):
         self._widthOfWindow = widthOfWindow
@@ -52,13 +53,25 @@ class ColorMoments(Model):
                 resultStd[hIdx, wIdx, :] = np.std(window, axis=(0, 1))
                 # I tried scipy.stats.skew, but it seems the result is not correct.
                 # Implement it by myself.
-                resultSkew[hIdx, wIdx, 0] = np.sum(np.power(window[:, :, 0] - resultMean[hIdx, wIdx, 0], 3)) / (self._heightOfWindow * self._widthOfWindow)
-                resultSkew[hIdx, wIdx, 1] = np.sum(np.power(window[:, :, 1] - resultMean[hIdx, wIdx, 1], 3)) / (self._heightOfWindow * self._widthOfWindow)
-                resultSkew[hIdx, wIdx, 2] = np.sum(np.power(window[:, :, 2] - resultMean[hIdx, wIdx, 2], 3)) / (self._heightOfWindow * self._widthOfWindow)
+                resultSkew[hIdx, wIdx, 0] = np.sum(
+                    np.power(window[:, :, 0] - resultMean[hIdx, wIdx, 0], 3)
+                ) / (self._heightOfWindow * self._widthOfWindow)
+                resultSkew[hIdx, wIdx, 1] = np.sum(
+                    np.power(window[:, :, 1] - resultMean[hIdx, wIdx, 1], 3)
+                ) / (self._heightOfWindow * self._widthOfWindow)
+                resultSkew[hIdx, wIdx, 2] = np.sum(
+                    np.power(window[:, :, 2] - resultMean[hIdx, wIdx, 2], 3)
+                ) / (self._heightOfWindow * self._widthOfWindow)
 
-                resultSkew[hIdx, wIdx, 0] = np.sign(resultSkew[hIdx, wIdx, 0]) * (np.abs(resultSkew[hIdx, wIdx, 0])) ** (1/3)
-                resultSkew[hIdx, wIdx, 1] = np.sign(resultSkew[hIdx, wIdx, 1]) * (np.abs(resultSkew[hIdx, wIdx, 1])) ** (1/3)
-                resultSkew[hIdx, wIdx, 2] = np.sign(resultSkew[hIdx, wIdx, 2]) * (np.abs(resultSkew[hIdx, wIdx, 2])) ** (1/3)
+                resultSkew[hIdx, wIdx, 0] = np.sign(resultSkew[hIdx, wIdx, 0]) * (
+                    np.abs(resultSkew[hIdx, wIdx, 0])
+                ) ** (1 / 3)
+                resultSkew[hIdx, wIdx, 1] = np.sign(resultSkew[hIdx, wIdx, 1]) * (
+                    np.abs(resultSkew[hIdx, wIdx, 1])
+                ) ** (1 / 3)
+                resultSkew[hIdx, wIdx, 2] = np.sign(resultSkew[hIdx, wIdx, 2]) * (
+                    np.abs(resultSkew[hIdx, wIdx, 2])
+                ) ** (1 / 3)
 
         return (resultMean, resultStd, resultSkew)
 
@@ -221,106 +234,20 @@ class ColorMoments(Model):
             featureMatrix = []
 
             for feature in featureList:
-                flat_mean_Y = np.reshape(feature[0][:,:,0],-1)
-                flat_mean_U = np.reshape(feature[0][:,:,1],-1)
-                flat_mean_V = np.reshape(feature[0][:,:,2],-1)
-                normalized_flat_mean_Y = (flat_mean_Y-np.min(flat_mean_Y))/ (np.max(flat_mean_Y)-np.min(flat_mean_Y))
-                normalized_flat_mean_U = (flat_mean_U-np.min(flat_mean_U))/ (np.max(flat_mean_U)-np.min(flat_mean_U))
-                normalized_flat_mean_V = (flat_mean_V-np.min(flat_mean_V))/ (np.max(flat_mean_V)-np.min(flat_mean_V))
-
-                flat_std_Y = np.reshape(feature[1][:, :, 0], -1)
-                flat_std_U = np.reshape(feature[1][:, :, 1], -1)
-                flat_std_V = np.reshape(feature[1][:, :, 2], -1)
-                normalized_flat_std_Y = (flat_std_Y - np.min(flat_std_Y)) / (
-                            np.max(flat_std_Y) - np.min(flat_std_Y))
-                normalized_flat_std_U = (flat_std_U - np.min(flat_std_U)) / (
-                            np.max(flat_std_U) - np.min(flat_std_U))
-                normalized_flat_std_V = (flat_std_V - np.min(flat_std_V)) / (
-                            np.max(flat_std_V) - np.min(flat_std_V))
-
-                flat_skew_Y = np.reshape(feature[2][:, :, 0], -1)
-                flat_skew_U = np.reshape(feature[2][:, :, 1], -1)
-                flat_skew_V = np.reshape(feature[2][:, :, 2], -1)
-                normalized_flat_skew_Y = (flat_skew_Y - np.min(flat_skew_Y)) / (
-                            np.max(flat_skew_Y) - np.min(flat_skew_Y))
-                normalized_flat_skew_U = (flat_skew_U - np.min(flat_skew_U)) / (
-                            np.max(flat_skew_U) - np.min(flat_skew_U))
-                normalized_flat_skew_V = (flat_skew_V - np.min(flat_skew_V)) / (
-                            np.max(flat_skew_V) - np.min(flat_skew_V))
-
-
-                count= np.zeros((9,10),dtype=int)
-
-
-                for ele_normalized_flat_mean_Y,ele_normalized_flat_mean_U,ele_normalized_flat_mean_V, \
-                    ele_normalized_flat_std_Y,  ele_normalized_flat_std_U, ele_normalized_flat_std_V,\
-                    ele_normalized_flat_skew_Y, normalized_flat_skew_U, normalized_flat_skew_V in \
-                    zip(normalized_flat_mean_Y,normalized_flat_mean_U,normalized_flat_mean_V,\
-                        normalized_flat_std_Y,normalized_flat_std_U,normalized_flat_std_V,\
-                        normalized_flat_skew_Y,normalized_flat_skew_U,normalized_flat_skew_V):
-
-                    if int(ele_normalized_flat_mean_Y) == 1:
-                        count[0][int(math.floor(ele_normalized_flat_mean_Y*10-1))] +=1
-                    else:
-                        count[0][int(math.floor(ele_normalized_flat_mean_Y * 10))] += 1
-
-                    if int(ele_normalized_flat_mean_U) == 1:
-                        count[1][int(math.floor(ele_normalized_flat_mean_U*10-1))] +=1
-                    else:
-                        count[1][int(math.floor(ele_normalized_flat_mean_U * 10))] += 1
-
-
-                    if int(ele_normalized_flat_mean_V) == 1:
-                        count[2][int(math.floor(ele_normalized_flat_mean_V*10-1))] +=1
-                    else:
-                        count[2][int(math.floor(ele_normalized_flat_mean_V * 10))] += 1
-
-
-                    if int(ele_normalized_flat_std_Y) == 1:
-                        count[3][int(math.floor(ele_normalized_flat_std_Y*10-1))] +=1
-                    else:
-                        count[3][int(math.floor(ele_normalized_flat_std_Y * 10))] += 1
-
-                    if int(ele_normalized_flat_std_U) == 1:
-                        count[4][int(math.floor(ele_normalized_flat_std_U*10-1))] +=1
-                    else:
-                        count[4][int(math.floor(ele_normalized_flat_std_U * 10))] += 1
-
-                    if int(ele_normalized_flat_std_V) == 1:
-                        count[5][int(math.floor(ele_normalized_flat_std_V*10-1))] +=1
-                    else:
-                        count[5][int(math.floor(ele_normalized_flat_std_V * 10))] += 1
-
-                    if int(ele_normalized_flat_skew_Y) == 1:
-                        count[6][int(math.floor(ele_normalized_flat_skew_Y*10-1))] +=1
-                    else:
-                        count[6][int(math.floor(ele_normalized_flat_skew_Y * 10))] += 1
-
-                    if int(normalized_flat_skew_U) == 1:
-                        count[7][int(math.floor(normalized_flat_skew_U*10-1))] +=1
-                    else:
-                        count[7][int(math.floor(normalized_flat_skew_U * 10))] += 1
-
-                    if int(normalized_flat_skew_V) == 1:
-                        count[8][int(math.floor(normalized_flat_skew_V*10-1))] +=1
-                    else:
-                        count[8][int(math.floor(normalized_flat_skew_V * 10))] += 1
-
-                count = np.reshape(count,(1,-1))
+                count = self.flattenFecture(feature, type(dimRed).__name__)
 
                 featureMatrix = (
-                    (count) if len(featureMatrix)==0 else (np.concatenate((featureMatrix,count),axis=0))
+                    (count)
+                    if len(featureMatrix) == 0
+                    else (np.concatenate((featureMatrix, count), axis=0))
                 )
 
-            return dimRed(featureMatrix,k)
+            return dimRed(featureMatrix, k)
 
         else:
-            flatFeatureList =[]
+            flatFeatureList = []
             for feature in featureList:
-                flatFeature1 = np.reshape(feature[0], (1, -1))
-                flatFeature2 = np.reshape(feature[1], (1, -1))
-                flatFeature3 = np.reshape(feature[2], (1, -1))
-                flatFeatures = np.concatenate((flatFeature1, flatFeature2, flatFeature3), axis=1)
+                flatFeatures = self.flattenFecture(feature, type(dimRed).__name__)
 
                 flatFeatureList.append(flatFeatures)
 
@@ -328,4 +255,139 @@ class ColorMoments(Model):
 
             return dimRed(featureMatrix, k)
 
-        
+    def flattenFecture(self, feature, dimRedName=None):
+        if dimRedName is not None and dimRedName.lower() == "lda":
+            flat_mean_Y = np.reshape(feature[0][:, :, 0], -1)
+            flat_mean_U = np.reshape(feature[0][:, :, 1], -1)
+            flat_mean_V = np.reshape(feature[0][:, :, 2], -1)
+            normalized_flat_mean_Y = (flat_mean_Y - np.min(flat_mean_Y)) / (
+                np.max(flat_mean_Y) - np.min(flat_mean_Y)
+            )
+            normalized_flat_mean_U = (flat_mean_U - np.min(flat_mean_U)) / (
+                np.max(flat_mean_U) - np.min(flat_mean_U)
+            )
+            normalized_flat_mean_V = (flat_mean_V - np.min(flat_mean_V)) / (
+                np.max(flat_mean_V) - np.min(flat_mean_V)
+            )
+
+            flat_std_Y = np.reshape(feature[1][:, :, 0], -1)
+            flat_std_U = np.reshape(feature[1][:, :, 1], -1)
+            flat_std_V = np.reshape(feature[1][:, :, 2], -1)
+            normalized_flat_std_Y = (flat_std_Y - np.min(flat_std_Y)) / (
+                np.max(flat_std_Y) - np.min(flat_std_Y)
+            )
+            normalized_flat_std_U = (flat_std_U - np.min(flat_std_U)) / (
+                np.max(flat_std_U) - np.min(flat_std_U)
+            )
+            normalized_flat_std_V = (flat_std_V - np.min(flat_std_V)) / (
+                np.max(flat_std_V) - np.min(flat_std_V)
+            )
+
+            flat_skew_Y = np.reshape(feature[2][:, :, 0], -1)
+            flat_skew_U = np.reshape(feature[2][:, :, 1], -1)
+            flat_skew_V = np.reshape(feature[2][:, :, 2], -1)
+            normalized_flat_skew_Y = (flat_skew_Y - np.min(flat_skew_Y)) / (
+                np.max(flat_skew_Y) - np.min(flat_skew_Y)
+            )
+            normalized_flat_skew_U = (flat_skew_U - np.min(flat_skew_U)) / (
+                np.max(flat_skew_U) - np.min(flat_skew_U)
+            )
+            normalized_flat_skew_V = (flat_skew_V - np.min(flat_skew_V)) / (
+                np.max(flat_skew_V) - np.min(flat_skew_V)
+            )
+
+            count = np.zeros((9, 10), dtype=int)
+
+            for (
+                ele_normalized_flat_mean_Y,
+                ele_normalized_flat_mean_U,
+                ele_normalized_flat_mean_V,
+                ele_normalized_flat_std_Y,
+                ele_normalized_flat_std_U,
+                ele_normalized_flat_std_V,
+                ele_normalized_flat_skew_Y,
+                normalized_flat_skew_U,
+                normalized_flat_skew_V,
+            ) in zip(
+                normalized_flat_mean_Y,
+                normalized_flat_mean_U,
+                normalized_flat_mean_V,
+                normalized_flat_std_Y,
+                normalized_flat_std_U,
+                normalized_flat_std_V,
+                normalized_flat_skew_Y,
+                normalized_flat_skew_U,
+                normalized_flat_skew_V,
+            ):
+
+                if int(ele_normalized_flat_mean_Y) == 1:
+                    count[0][
+                        int(math.floor(ele_normalized_flat_mean_Y * 10 - 1))
+                    ] += 1
+                else:
+                    count[0][int(math.floor(ele_normalized_flat_mean_Y * 10))] += 1
+
+                if int(ele_normalized_flat_mean_U) == 1:
+                    count[1][
+                        int(math.floor(ele_normalized_flat_mean_U * 10 - 1))
+                    ] += 1
+                else:
+                    count[1][int(math.floor(ele_normalized_flat_mean_U * 10))] += 1
+
+                if int(ele_normalized_flat_mean_V) == 1:
+                    count[2][
+                        int(math.floor(ele_normalized_flat_mean_V * 10 - 1))
+                    ] += 1
+                else:
+                    count[2][int(math.floor(ele_normalized_flat_mean_V * 10))] += 1
+
+                if int(ele_normalized_flat_std_Y) == 1:
+                    count[3][
+                        int(math.floor(ele_normalized_flat_std_Y * 10 - 1))
+                    ] += 1
+                else:
+                    count[3][int(math.floor(ele_normalized_flat_std_Y * 10))] += 1
+
+                if int(ele_normalized_flat_std_U) == 1:
+                    count[4][
+                        int(math.floor(ele_normalized_flat_std_U * 10 - 1))
+                    ] += 1
+                else:
+                    count[4][int(math.floor(ele_normalized_flat_std_U * 10))] += 1
+
+                if int(ele_normalized_flat_std_V) == 1:
+                    count[5][
+                        int(math.floor(ele_normalized_flat_std_V * 10 - 1))
+                    ] += 1
+                else:
+                    count[5][int(math.floor(ele_normalized_flat_std_V * 10))] += 1
+
+                if int(ele_normalized_flat_skew_Y) == 1:
+                    count[6][
+                        int(math.floor(ele_normalized_flat_skew_Y * 10 - 1))
+                    ] += 1
+                else:
+                    count[6][int(math.floor(ele_normalized_flat_skew_Y * 10))] += 1
+
+                if int(normalized_flat_skew_U) == 1:
+                    count[7][int(math.floor(normalized_flat_skew_U * 10 - 1))] += 1
+                else:
+                    count[7][int(math.floor(normalized_flat_skew_U * 10))] += 1
+
+                if int(normalized_flat_skew_V) == 1:
+                    count[8][int(math.floor(normalized_flat_skew_V * 10 - 1))] += 1
+                else:
+                    count[8][int(math.floor(normalized_flat_skew_V * 10))] += 1
+
+            count = np.reshape(count, (1, -1))
+
+            return count
+        else:
+            flatFeature1 = np.reshape(feature[0], (1, -1))
+            flatFeature2 = np.reshape(feature[1], (1, -1))
+            flatFeature3 = np.reshape(feature[2], (1, -1))
+            flatFeatures = np.concatenate(
+                (flatFeature1, flatFeature2, flatFeature3), axis=1
+            )
+
+            return flatFeatures

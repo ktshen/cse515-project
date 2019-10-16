@@ -1,12 +1,10 @@
-import sys
 from module.database import FilesystemDatabase
 from module.dimensionReduction import DimReduction
-from pathlib import Path
 from models import modelFactory
 import argparse
 from module.distanceFunction import distanceFunction
-import shutil
 from module.handMetadataParser import getFilelistByLabel
+import cv2
 
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 4")
@@ -72,8 +70,14 @@ parser.add_argument(
     "--image_id",
     metavar="image_id",
     type=str,
-    help="The unlabled image ID.",
-    required=True,
+    help="The unlabled image ID."
+)
+parser.add_argument(
+    "-ip",
+    "--image_path",
+    metavar="image_path",
+    type=str,
+    help="The unlabled image ID."
 )
 args = parser.parse_args()
 
@@ -82,10 +86,16 @@ model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
-unlabeledImageID = args.image_id
 distFunction = args.distance.lower()
 metadataPath = args.metadata
 label = args.label   # Used to filter such as left-hand or right-hand
+
+# The first one is a image id in dataset. The second one is a path to load an image.
+unlabeledImageID = args.image_id
+unlabeledImagePath = args.image_path
+
+if unlabeledImageID is None and unlabeledImagePath is None:
+    parser.error('Please give unlabled image ID or path in -i / -ip argument.')
 
 # Get filelist according to the label
 filteredFilelist = getFilelistByLabel(metadataPath, label)
@@ -117,8 +127,21 @@ for keyId in filteredFilelist:
 decompData = model.dimensionReduction(featuresList, decompFunction)
 
 # Unlabeled Image Feature
-# unlabeldedImgFeature = model.deserializeFeature(db.getData(unlabeledImageID))
+if unlabeledImageID is not None:
+    unlabelFeature = model.deserializeFeature(db.getData(unlabeledImageID))
+elif unlabeledImagePath is not None:
+    unlabelFeature = model.extractFeatures(cv2.imread(unlabeledImagePath))
 
-# resultMatrix = decompFunction.getObjLaten(decompData, topk)
+if unlabelFeature is None:
+    raise Exception("unlabeledImgFeature is None. Please check the unlabledImageID or unlabledImagePath is valid.")
 
-# TODO: Unfinished
+# Flatten the feature to a vector so that we can use it to calculate the distance.
+unlabelFeature = model.flattenFecture(unlabelFeature, decompMethod)
+
+unlabelProjection = decompFunction.projectFeature(unlabelFeature, decompData, topk)
+
+objLat = decompFunction.getObjLaten(decompData, topk)
+
+# Any better way to calculate the distance?
+for obj in objLat:
+    print(distance(unlabelProjection, obj))

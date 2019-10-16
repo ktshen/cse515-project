@@ -62,7 +62,7 @@ class HOG(Model):
             for j in range(0, len(feature[i])):
                 print("block " + str((i, j)))
                 print(feature[i][j])
-                
+
         return img
 
     def visualizeSimilarityResult(
@@ -77,8 +77,11 @@ class HOG(Model):
         flatFeatureList = []
 
         for feature in featureList:
-            flatFeatureList.append(feature.ravel())
+            flatFeatureList.append(self.flattenFecture(feature))
 
         featureMatrix = np.array(flatFeatureList)
 
         return dimRed(featureMatrix, k)
+
+    def flattenFecture(self, feature, dimRedName):
+        return feature.ravel()
