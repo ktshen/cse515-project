@@ -185,4 +185,4 @@ class SIFT(Model):
                 else:
                     finalList.append(temp_list[i][j][0] / temp_list[i][j][1])
 
-        return finalList
+        return np.array(finalList).reshape((-1))

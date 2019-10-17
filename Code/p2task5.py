@@ -1,11 +1,11 @@
 from module.database import FilesystemDatabase
-from module.dimensionReduction import DimReduction
+from module.DimRed import DimRed
 from models import modelFactory
 import argparse
 from module.distanceFunction import distanceFunction
 from module.handMetadataParser import getFilelistByLabel
 import cv2
-
+import numpy as np
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 4")
 parser.add_argument(
@@ -103,7 +103,7 @@ filteredFilelist = getFilelistByLabel(metadataPath, label)
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{model}", create=False)
 model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
+# decompFunction = DimRed.createReduction(decompMethod, k=topk)
 distance = distanceFunction.createDistance(distFunction)
 
 # The imageIdList and featureList should can be mapped to each other.
@@ -122,9 +122,10 @@ for keyId in filteredFilelist:
         if keyId == unlabeledImageID:
             continue
 
-        featuresList.append(model.deserializeFeature(feature))
+        featuresList.append(model.flattenFecture(model.deserializeFeature(feature)))
 
-decompData = model.dimensionReduction(featuresList, decompFunction)
+# decompData = model.dimensionReduction(featuresList, decompFunction)
+latenModel = DimRed.createReduction(decompMethod, k=topk, data=featuresList)
 
 # Unlabeled Image Feature
 if unlabeledImageID is not None:
@@ -138,9 +139,11 @@ if unlabelFeature is None:
 # Flatten the feature to a vector so that we can use it to calculate the distance.
 unlabelFeature = model.flattenFecture(unlabelFeature, decompMethod)
 
-unlabelProjection = decompFunction.projectFeature(unlabelFeature, decompData, topk)
+unlabelFeature = np.reshape(unlabelFeature, (1, -1))
 
-objLat = decompFunction.getObjLaten(decompData, topk)
+unlabelProjection = latenModel.transform(unlabelFeature)
+
+objLat = latenModel.transform(featuresList)
 
 # Any better way to calculate the distance?
 for obj in objLat:

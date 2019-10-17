@@ -379,8 +379,8 @@ class ColorMoments(Model):
                 else:
                     count[8][int(math.floor(normalized_flat_skew_V * 10))] += 1
 
-            count = np.reshape(count, (1, -1))
-
+            count = np.reshape(count, (-1))
+            # count = np.squeeze(count)
             return count
         else:
             flatFeature1 = np.reshape(feature[0], (1, -1))
@@ -390,4 +390,4 @@ class ColorMoments(Model):
                 (flatFeature1, flatFeature2, flatFeature3), axis=1
             )
 
-            return flatFeatures
+            return np.squeeze(flatFeatures)

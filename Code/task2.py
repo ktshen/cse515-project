@@ -91,9 +91,11 @@ for idx, keyId in enumerate(db.keys()):
     if target == keyId:
         targetIdx = idx
     imageIdList.append(keyId)
-    objFeat.append(model.flattenFecture(model.deserializeFeature(db.getData(keyId)), model))
+    objFeat.append(
+        model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+    )
 
-latentModel = DimRed.createReduction(decompMethod, k=topk, data = objFeat)
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
 resultMatrix = latentModel.transform(objFeat)
 
 targetFeature = resultMatrix[targetIdx]
@@ -120,7 +122,9 @@ outputFolder.mkdir(exist_ok=True)
 for i in range(min(topm, len(distanceScoreList))):
     score = distanceScoreList[i][0]
     imageId = distanceScoreList[i][1]
-    shutil.copyfile(imagePath / (imageId + ".jpg"), outputFolder / f"{i+1}_{imageId}_{score}.jpg")
+    shutil.copyfile(
+        imagePath / (imageId + ".jpg"), outputFolder / f"{i+1}_{imageId}_{score}.jpg"
+    )
     print(f"Rank: {i+1}  ID: {imageId}  Score: {score}")
 
 print(f"The result images have been written to folder {outputFolder}/.")

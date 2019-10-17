@@ -20,14 +20,7 @@ parser.add_argument(
     help="The table will be used.",
     required=True,
 )
-parser.add_argument(
-    "-k", 
-    "--topk", 
-    metavar="topk", 
-    type=int, 
-    help="K.", 
-    required=True
-)
+parser.add_argument("-k", "--topk", metavar="topk", type=int, help="K.", required=True)
 parser.add_argument(
     "-d",
     "--method",
@@ -54,7 +47,9 @@ model = modelFactory.creatModel(model)
 objFeat = []
 
 for keyId in db.keys():
-    objFeat.append(model.flattenFecture(model.deserializeFeature(db.getData(keyId)), model))
+    objFeat.append(
+        model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+    )
 
-latentModel = DimRed.createReduction(decompMethod, k=topk, data = objFeat)
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
 latentModel.printLatentSemantics()
