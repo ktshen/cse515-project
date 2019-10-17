@@ -59,7 +59,7 @@ for fileName in os.listdir(inputPath):
 
 for i, imgFile in enumerate(allFiles):
     # Convert Path to str since imread do not recognize Path
-    if not db.getData(imgFile.stem):
+    if db.getData(imgFile.stem) is not None:
         img = cv.imread(str(imgFile))
         features = model.extractFeatures(img)
         featuresData = model.serializeFeature(features)

@@ -15,10 +15,10 @@ python p2task1.py -m cm -t test -k 5 -d svd
 
 #### Task 2 example:
 Note: Please run phase 1 task 2 first to build database.
-TODO: We need to confirm that how to utilize UsV of each dimension reduction.
+
 TODO: We may need to find a new way to represent output.
 
-Using color moments, load "test" table, topk is 10, the method of dimension reduction is svd, target ID is Hand\_0008110, find m(10) similar images, and the path of dataset is followed by -p.
+Using color moments, load "test" table, topk is 10, the method of dimension reduction is svd, target ID is Hand\_0008110, find m(10) similar images, and the path of dataset is followed by `-p`.
 
 ```Shell
 python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset 
@@ -26,9 +26,10 @@ python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse5
 
 #### Task 3 example:
 Note: Please run phase 1 task 2 first to build database.
+
 TODO: We need to confirm if task 3 is combination of task 1 with label.
 
-In this task, I added two argument: -meta for metadata path and -l for label.
+In this task, I added two argument: -meta for metadata path and `-l` for label.
 
 Metadata can be downloaded from the following link. Please download **csv** file.
 
@@ -36,7 +37,7 @@ Metadata can be downloaded from the following link. Please download **csv** file
 
 (*.csv) [download](https://drive.google.com/open?id=1RC86-rVOR8c93XAfM9b9R45L7C2B0FdA) (759 KB)
 
-According to project specification, we need to process 8 types of label. Please use ***one character followed** by -l to indicate what label you want.
+According to project specification, we need to process 8 types of label. Please use **one character followed** by `-l` to indicate what label you want.
 
 - l -> left-hand
 - r -> right-hand
@@ -58,6 +59,20 @@ Task 4 is very similar to task 2. But we add some arguments to find some images 
 
 ```Shell
 python p2task4.py -m cm -t test -k 5 -d svd -meta ~/hw/cse515_data/HandInfo.csv -l l -mi 5 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset -i Hand_0008110
+```
+
+#### Task 5 example:
+
+Task 5 basically needs a labeled image and an unlabled image. To give an unlabeled image, we can assign an image ID in dataset which would not be used in dimension reduction, or an image path that is not belong to dataset.
+
+Using `-i` argument to give an image ID which exists in database.
+```Shell
+python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInfo.csv -i Hand_0000002
+```
+
+Using `-ip` argument to give an image path.
+```Shell
+python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInfo.csv -ip ~/hw/cse515_data/Hands/Hand_0010646.jpg
 ```
 
 ## Phase 1
