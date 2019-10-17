@@ -108,18 +108,21 @@ class PCA(DimReduction):
         V = pca.components_
         U = V.T
         C = pca.get_covariance()
+        mu = np.mean(data, axis=0)
 
-        return (dataTransform, s, V)
+        return (dataTransform, s, V, mu)
 
     def getTermWeight(self, data, topk):
         # task 1,3
-        _, s, _ = data
+        _, s, _, _ = data
         return np.diag(s[:topk])
         pass
 
     def projectFeature(self, feature, data, topk):
         # task 5
-        pass
+        V = data[2]
+        V = V[:topk, :]
+        return np.dot(feature-data[3], V.T)
 
     def getObjLaten(self, data, topk):
         # task 2,4
@@ -136,25 +139,41 @@ class LDA(DimReduction):
         lda = SKLDA(n_components=k, n_jobs=-1).fit(data)
         picTop = lda.transform(data)
         topFeature = lda.components_
-        # weight = lda.exp_dirichlet_component_
+        weight = lda.exp_dirichlet_component_
+        topPrior = lda.doc_topic_prior_
 
-        return [picTop, topFeature, k, data]
+        return [picTop, topFeature, k, data, weight, topPrior]
 
     def getTermWeight(self, data, topk):
         if data[2] != topk:
-            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            picTop, topFeature, topk, feature, weight, topPrior = self.__call__(data[3], topk)
             data[0] = picTop
             data[1] = topFeature
             data[2] = topk
+            data[4] = weight
+            data[5] = topPrior
         return data[1]
 
     def projectFeature(self, feature, data, topk):
-        pass
-
-    def getObjLaten(self, data, topk):
         if data[2] != topk:
-            picTop, topFeature, topk, feature = self.__call__(data[3], topk)
+            picTop, topFeature, topk, orifeature, weight, topPrior = self.__call__(data[3], topk)
             data[0] = picTop
             data[1] = topFeature
             data[2] = topk
+            data[4] = weight
+            data[5] = topPrior
+        lda = SKLDA()
+        lda.components_ = data[1]
+        lda.exp_dirichlet_component_ = data[4]
+        lda.doc_topic_prior_ = data[5]
+        return lda.transform(feature)
+
+    def getObjLaten(self, data, topk):
+        if data[2] != topk:
+            picTop, topFeature, topk, feature, weight, topPrior = self.__call__(data[3], topk)
+            data[0] = picTop
+            data[1] = topFeature
+            data[2] = topk
+            data[4] = weight
+            data[5] = topPrior
         return data[0]
