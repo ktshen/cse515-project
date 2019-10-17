@@ -106,5 +106,5 @@ class LocalBP(Model):
 
         return dimRed(featureMatrix, k)
 
-    def flattenFecture(self, feature, dimRedName):
+    def flattenFecture(self, feature, dimRedName = None):
         return feature.ravel()
