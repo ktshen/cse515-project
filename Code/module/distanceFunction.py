@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-import scipy.stats.entropy as kvd
-
+import scipy.stats
 
 class distanceFunction(ABC):
     @abstractmethod
@@ -52,7 +51,7 @@ class Kvd(distanceFunction):
     
     def __call__(self, data1, data2):
         
-        return kvd(data1, data2)
+        return scipy.stats.entropy(data1, data2)
         
 if __name__ == "__main__":
     l2Norm = Norm(2)
