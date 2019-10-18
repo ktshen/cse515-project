@@ -4,6 +4,9 @@ from abc import ABC, abstractmethod
 
 
 class DimRed(ABC):
+
+    methods = {}
+
     @abstractmethod
     def __init__(self, k, data):
         pass
@@ -16,17 +19,23 @@ class DimRed(ABC):
     def transform(self, data):
         pass
 
+    @classmethod
+    def registerMethod(cls, method):
+        DimRed.methods[method.__name__.lower()] = method
+
+    @staticmethod
+    def getSupportedMethods():
+        return list(DimRed.methods.keys())
+
     @staticmethod
     def createReduction(method, **kwargs):
-        # Add new method here
-        methods = {"svd": SVD, "pca": PCA, "lda": LDA, "nmf": NMF}
-
-        if method.lower() in methods:
-            return methods[method](**kwargs)
+        if method.lower() in DimRed.methods:
+            return DimRed.methods[method](**kwargs)
         else:
             raise Exception("Not supported dimension reduction method.")
 
 
+@DimRed.registerMethod
 class SVD(DimRed):
     def __init__(self, k, data):
         self.svd = sk.TruncatedSVD(n_components=k)
@@ -40,7 +49,7 @@ class SVD(DimRed):
     def transform(self, data):
         return self.svd.transform(data)
 
-
+@DimRed.registerMethod
 class NMF(DimRed):
     def __init__(self, k, data):
         self.nmf = sk.NMF(n_components=k)
@@ -57,6 +66,7 @@ class NMF(DimRed):
         return self.nmf.transform(data)
 
 
+@DimRed.registerMethod
 class PCA(DimRed):
     def __init__(self, k, data):
         self.pca = sk.PCA(n_components=k)
@@ -71,6 +81,7 @@ class PCA(DimRed):
         return self.pca.transform(data)
 
 
+@DimRed.registerMethod
 class LDA(DimRed):
     def __init__(self, k, data):
         self.lda = sk.LatentDirichletAllocation(n_components=k)
