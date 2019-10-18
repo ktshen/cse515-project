@@ -1,7 +1,6 @@
 from module.database import FilesystemDatabase
 from module.DimRed import DimRed
 from models import modelFactory
-import numpy as np
 from pathlib import Path
 import argparse
 
@@ -42,18 +41,18 @@ parser.add_argument(
 args = parser.parse_args()
 
 # extract argument
-model = args.model.lower()
+modelName = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
 imagePath = Path(args.image_path)
 # Create database according to model and table name
-db = FilesystemDatabase(f"{table}_{model}", create=False)
+db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 # Removed unused variable in case misusing.
 del table
 
 # Load features of images
-model = modelFactory.creatModel(model)
+model = modelFactory.creatModel(modelName)
 objFeat = []
 objId = []
 
