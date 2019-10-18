@@ -5,6 +5,7 @@
 
 #### Task 1 example:
 Note: Please run phase 1 task 2 first so that can decrease the time to get image features.
+
 TODO: We need to confirm whether we can use phase 1 task 2 to build database before phase 2 demo.
 
 Using model color moments, load "test" table, topk is 5, image directory is .../imgPath, and the method of dimension reduction is svd.
@@ -73,6 +74,13 @@ python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInf
 Using `-ip` argument to give an image path.
 ```Shell
 python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInfo.csv -ip ~/hw/cse515_data/Hands/Hand_0010646.jpg
+```
+
+#### Task 6 example:
+
+For task 6, only table name and subject ID are necessary.
+```Shell
+python p2task6.py -t test -i Hand_0000002
 ```
 
 ## Phase 1
