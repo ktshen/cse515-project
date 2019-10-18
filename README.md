@@ -5,6 +5,7 @@
 
 #### Task 1 example:
 Note: Please run phase 1 task 2 first so that can decrease the time to get image features.
+
 TODO: We need to confirm whether we can use phase 1 task 2 to build database before phase 2 demo.
 
 Using model color moments, load "test" table, topk is 5, image directory is .../imgPath, and the method of dimension reduction is svd.
@@ -21,7 +22,7 @@ TODO: We may need to find a new way to represent output.
 Using color moments, load "test" table, topk is 10, the method of dimension reduction is svd, target ID is Hand\_0008110, find m(10) similar images, and the path of dataset is followed by `-p`.
 
 ```Shell
-python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset 
+python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset
 ```
 
 #### Task 3 example:
@@ -73,6 +74,25 @@ python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInf
 Using `-ip` argument to give an image path.
 ```Shell
 python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInfo.csv -ip ~/hw/cse515_data/Hands/Hand_0010646.jpg
+```
+
+#### Task 6 example:
+
+For task 6, only table name and subject ID are necessary.
+```Shell
+python p2task6.py -t test -i Hand_0000002
+```
+
+#### Task 7 example
+For task 7, number of top k latent semantics and the directory of images
+```Shell
+python p2task7.py -k 10 -img ~/hw/cse515_data/Hands/
+```
+
+#### Task 8 example
+For task 8, number of top k latent semantics and the directory of images
+```Shell
+python p2task8.py -k 10 -img ~/hw/cse515_data/Hands/ -meta ~/hw/cse515_data/HandInfo.csv
 ```
 
 ## Phase 1
