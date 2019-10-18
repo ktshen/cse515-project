@@ -7,9 +7,9 @@
 Note: Please run phase 1 task 2 first so that can decrease the time to get image features.
 TODO: We need to confirm whether we can use phase 1 task 2 to build database before phase 2 demo.
 
-Using model color moments, load "test" table, topk is 5, and the method of dimension reduction is svd.
+Using model color moments, load "test" table, topk is 5, image directory is .../img, and the method of dimension reduction is svd.
 ```Shell
-python p2task1.py -m cm -t test -k 5 -d svd
+python p2task1.py -m cm -t test -k 5 -p .../img -d svd
 ```
 
 
