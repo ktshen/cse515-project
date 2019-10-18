@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 from module.reader import RGBtoArrayReader
-from module.DimRed import NMF
+from module.DimRed import DimRed
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Get necessary arguments
@@ -28,5 +28,5 @@ similarity_matrix = cosine_similarity(flatten_images_array)
 images = RAR.get_parsed_image_list()
 
 # Perfrom NMF process and print results
-nmf = NMF(topk, similarity_matrix)
+nmf = DimRed.createReduction('nmf', k=topk, data=similarity_matrix)
 nmf.printLatentSemantics(images, similarity_matrix)

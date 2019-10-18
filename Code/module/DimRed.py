@@ -95,6 +95,10 @@ class NMF(DimRed):
     def transform(self, data):
         return self.nmf.transform(data)
 
+    @property
+    def components_(self):
+        return self.nmf.components_
+
 
 @DimRed.registerMethod
 class PCA(DimRed):
