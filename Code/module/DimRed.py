@@ -22,6 +22,10 @@ class DimRed(ABC):
     def transform(self, data):
         pass
 
+    @abstractmethod
+    def getLatentSemantics(self):
+        pass
+
     @classmethod
     def registerMethod(cls, method):
         DimRed.methods[method.__name__.lower()] = method
@@ -63,9 +67,12 @@ class SVD(DimRed):
             )
         print(f"The result images have been written to folder {outputFolder}/.")
 
-
     def transform(self, data):
         return self.svd.transform(data)
+
+    def getLatentSemantics(self):
+        return self.svd.components_
+
 
 @DimRed.registerMethod
 class NMF(DimRed):
@@ -94,6 +101,9 @@ class NMF(DimRed):
 
     def transform(self, data):
         return self.nmf.transform(data)
+
+    def getLatentSemantics(self):
+        return self.nmf.components_
 
     @property
     def components_(self):
@@ -128,6 +138,9 @@ class PCA(DimRed):
     def transform(self, data):
         return self.pca.transform(data)
 
+    def getLatentSemantics(self):
+        return self.pca.components_
+
 
 @DimRed.registerMethod
 class LDA(DimRed):
@@ -156,3 +169,6 @@ class LDA(DimRed):
 
     def transform(self, data):
         return self.lda.transform(data)
+
+    def getLatentSemantics(self):
+        return self.lda.components_
