@@ -6,6 +6,8 @@ from models import modelFactory
 import argparse
 from module.distanceFunction import distanceFunction
 import shutil
+from module.handMetadataParser import getFilelistByLabel
+
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 2")
 parser.add_argument(
@@ -58,6 +60,30 @@ parser.add_argument(
     help="Distance function.",
     default="l2",
 )
+parser.add_argument(
+    "-l",
+    "--label",
+    metavar="label",
+    type=str,
+    help="""Label used for filter file list.\n
+    l for left-hand,\n
+    r for right-hand,\n
+    d for dorsal,\n
+    p for palmar,\n
+    a for with accessories,\n
+    n for without accessories,\n
+    m for male,\n
+    f for female.""",
+    required=True
+)
+parser.add_argument(
+    "-meta",
+    "--metadata",
+    metavar="METADATA_PATH",
+    type=str,
+    help="Path of metadata.",
+    required=True
+)
 args = parser.parse_args()
 
 # extract argument
@@ -69,6 +95,11 @@ target = args.image_id
 distFunction = args.distance.lower()
 topm = args.topm
 imagePath = Path(args.image_path)
+metadataPath = args.metadata
+label = args.label
+
+# Get filelist according to the label
+filteredFilelist = getFilelistByLabel(metadataPath, label)
 
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{modelName}", create=False)
@@ -87,13 +118,18 @@ del table
 
 objFeat = []
 
-for idx, keyId in enumerate(db.keys()):
-    if target == keyId:
-        targetIdx = idx
-    imageIdList.append(keyId)
-    objFeat.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
-    )
+for keyId in filteredFilelist:
+    feature = db.getData(keyId)
+
+    # Because the database may store subset dataset only.
+    # Some keyId may not exsit in database and therefore the feature would be None.
+    if feature is not None:
+        if keyId == target:
+            targetIdx = len(imageIdList)
+        imageIdList.append(keyId)
+        objFeat.append(
+            model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+        )
 
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
 resultMatrix = latentModel.transform(objFeat)
@@ -116,7 +152,7 @@ for featureIdx in range(0, resultMatrix.shape[0]):
 distanceScoreList.sort()
 
 # TODO: We may need to find a new way to represent output.
-outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{target}_{topm}")
+outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{label}_{target}_{topm}")
 outputFolder.mkdir(exist_ok=True)
 
 for i in range(min(topm, len(distanceScoreList))):
