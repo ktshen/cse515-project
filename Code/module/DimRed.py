@@ -64,10 +64,9 @@ class NMF(DimRed):
         self.nmf = sk.NMF(n_components=k)
         self.nmf.fit(data)
 
-    def printLatentSemantics(self, ids, data, imagePath):
+    def printLatentSemantics(self, ids, data, imagePath=""):
         outputFolder = Path("NMF latent semantics")
         outputFolder.mkdir(exist_ok=True)
-
         print("The NMF latent semantics are:(order, id, dot product value)")
         for order, ls in enumerate(self.nmf.components_):
             maxIndex = 0
@@ -78,10 +77,11 @@ class NMF(DimRed):
                     maxIndex = index
                     maxProjection = projection
             print((order + 1, ids[maxIndex], maxProjection))
-            shutil.copyfile(
-                imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
-            )
-        print(f"The result images have been written to folder {outputFolder}/.")
+            if imagePath:
+                shutil.copyfile(
+                    imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
+                )
+                print(f"The result images have been written to folder {outputFolder}/.")
 
     def transform(self, data):
         return self.nmf.transform(data)
