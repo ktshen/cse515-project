@@ -1,6 +1,9 @@
 import numpy as np
 import sklearn.decomposition as sk
 from abc import ABC, abstractmethod
+from _operator import index
+import shutil
+from pathlib import Path
 
 
 class DimRed(ABC):
@@ -9,7 +12,7 @@ class DimRed(ABC):
         pass
 
     @abstractmethod
-    def printLatentSemantics(self):
+    def printLatentSemantics(self, ids, data, imagePath):
         pass
 
     @abstractmethod
@@ -32,10 +35,25 @@ class SVD(DimRed):
         self.svd = sk.TruncatedSVD(n_components=k)
         self.svd.fit(data)
 
-    def printLatentSemantics(self):
-        print("The SVD latent semantics are: (weight, term)")
-        for weight, term in zip(self.svd.explained_variance_, self.svd.components_):
-            print((weight, term))
+    def printLatentSemantics(self, ids, data, imagePath):
+        outputFolder = Path("SVD latent semantics")
+        outputFolder.mkdir(exist_ok=True)
+
+        print("The SVD latent semantics are:(order, id, dot product value)")
+        for order, ls in enumerate(self.svd.components_):
+            maxIndex = 0
+            maxProjection = 0
+            for index, obj in enumerate(data):
+                projection = np.dot(ls, obj)
+                if projection > maxProjection:
+                    maxIndex = index
+                    maxProjection = projection
+            print((order + 1, ids[maxIndex]), maxProjection)
+            shutil.copyfile(
+                imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
+            )
+        print(f"The result images have been written to folder {outputFolder}/.")
+
 
     def transform(self, data):
         return self.svd.transform(data)
@@ -46,12 +64,24 @@ class NMF(DimRed):
         self.nmf = sk.NMF(n_components=k)
         self.nmf.fit(data)
 
-    def printLatentSemantics(self):
-        print("The NMF latent semantics are: (order, term)")
-        order = 1
-        for term in self.nmf.components_:
-            print((order, term))
-            order += 1
+    def printLatentSemantics(self, ids, data, imagePath):
+        outputFolder = Path("NMF latent semantics")
+        outputFolder.mkdir(exist_ok=True)
+
+        print("The NMF latent semantics are:(order, id, dot product value)")
+        for order, ls in enumerate(self.nmf.components_):
+            maxIndex = 0
+            maxProjection = 0
+            for index, obj in enumerate(data):
+                projection = np.dot(ls, obj)
+                if projection > maxProjection:
+                    maxIndex = index
+                    maxProjection = projection
+            print((order + 1, ids[maxIndex], maxProjection))
+            shutil.copyfile(
+                imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
+            )
+        print(f"The result images have been written to folder {outputFolder}/.")
 
     def transform(self, data):
         return self.nmf.transform(data)
@@ -62,10 +92,24 @@ class PCA(DimRed):
         self.pca = sk.PCA(n_components=k)
         self.pca.fit(data)
 
-    def printLatentSemantics(self):
-        print("The PCA latent semantics are: (weight, term)")
-        for weight, term in zip(self.pca.explained_variance_, self.pca.components_):
-            print((weight, term))
+    def printLatentSemantics(self, ids, data, imagePath):
+        outputFolder = Path("PCA latent semantics")
+        outputFolder.mkdir(exist_ok=True)
+
+        print("The PCA latent semantics are:(order, id, dot product value)")
+        for order, ls in enumerate(self.pca.components_):
+            maxIndex = 0
+            maxProjection = 0
+            for index, obj in enumerate(data):
+                projection = np.dot(ls, obj)
+                if projection > maxProjection:
+                    maxIndex = index
+                    maxProjection = projection
+            print((order + 1, ids[maxIndex]), maxProjection)
+            shutil.copyfile(
+                imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
+            )
+        print(f"The result images have been written to folder {outputFolder}/.")
 
     def transform(self, data):
         return self.pca.transform(data)
@@ -76,12 +120,24 @@ class LDA(DimRed):
         self.lda = sk.LatentDirichletAllocation(n_components=k)
         self.lda.fit(data)
 
-    def printLatentSemantics(self):
-        print("The LDA latent semantics are: (order, term)")
-        order = 1
-        for term in self.lda.components_:
-            print((order, term))
-            order += 1
+    def printLatentSemantics(self, ids, data, imagePath):
+        outputFolder = Path("LDA latent semantics")
+        outputFolder.mkdir(exist_ok=True)
+
+        print("The LDA latent semantics are:(order, id, dot product value)")
+        for order, ls in enumerate(self.lda.components_):
+            maxIndex = 0
+            maxProjection = 0
+            for index, obj in enumerate(data):
+                projection = np.dot(ls, obj)
+                if projection > maxProjection:
+                    maxIndex = index
+                    maxProjection = projection
+            print((order + 1, ids[maxIndex]), maxProjection)
+            shutil.copyfile(
+                imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
+            )
+        print(f"The result images have been written to folder {outputFolder}/.")
 
     def transform(self, data):
         return self.lda.transform(data)
