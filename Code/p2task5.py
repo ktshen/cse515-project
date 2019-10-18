@@ -122,7 +122,7 @@ for keyId in filteredFilelist:
         if keyId == unlabeledImageID:
             continue
 
-        featuresList.append(model.flattenFecture(model.deserializeFeature(feature)))
+        featuresList.append(model.flattenFecture(model.deserializeFeature(feature)), decompMethod)
 
 # decompData = model.dimensionReduction(featuresList, decompFunction)
 latenModel = DimRed.createReduction(decompMethod, k=topk, data=featuresList)

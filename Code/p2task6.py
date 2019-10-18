@@ -37,54 +37,51 @@ subjectImageID = args.image_id
 models = modelFactory.getSupportModel()
 decompMethods = DimRed.getSupportedMethods()
 
-for modelName, decompMethodName in itertools.product(models, decompMethods):
-    print(f"modelName: {modelName} decompMethodName:{decompMethodName}")
+# (model name, dimension reduction name) -> feature
+subjectFeature = {}
 
-import sys
-sys.exit(0)
+# model with corressponding latent space.
+# (model name, dimension reduction name) -> DimRed instance
+latents = {}
 
-# Create database according to model and table name
-db = FilesystemDatabase(f"{table}_{model}", create=False)
-model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
-distance = distanceFunction.createDistance(distFunction)
+previousModelName = None
 
-# The imageIdList and featureList should can be mapped to each other.
-featuresList = []
+productList = list(itertools.product(models, decompMethods))
 
-# Removed unsed variable in case misusing.
+defaultTopK = 20
+
+for i, p in enumerate(productList):
+
+    modelName, decompMethod = p
+
+    print(f"Calculating: {i} / {len(productList)} - {modelName.upper()} with {decompMethod.upper()}")
+
+    if modelName != previousModelName:
+        db = FilesystemDatabase(f"{table}_{modelName}", create=False)
+        model = modelFactory.creatModel(modelName)
+
+    featureMatrix = []
+
+    for keyId in db.keys():
+        feature = model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+
+        if keyId == subjectImageID:
+            subjectFeature[(modelName, decompMethod)] = feature
+        else:
+            featureMatrix.append(feature)
+
+    latentData = DimRed.createReduction(decompMethod, k=defaultTopK, data=featureMatrix)
+    latents[(modelName, decompMethod)] = latentData
+
+# Removed unused variable in case misusing.
 del table
+del productList
+del previousModelName
+del defaultTopK
+del modelName
+del decompMethod
+del p
+del i
+del featureMatrix
 
-# Load features of images
-for keyId in filteredFilelist:
-    feature = db.getData(keyId)
-
-    # If we found that the "unlabled image id" belong to a label.
-    # Then skip it and do not put it into feature list.
-    if feature is not None:
-        if keyId == unlabeledImageID:
-            continue
-
-        featuresList.append(model.deserializeFeature(feature))
-
-decompData = model.dimensionReduction(featuresList, decompFunction)
-
-# Unlabeled Image Feature
-if unlabeledImageID is not None:
-    unlabelFeature = model.deserializeFeature(db.getData(unlabeledImageID))
-elif unlabeledImagePath is not None:
-    unlabelFeature = model.extractFeatures(cv2.imread(unlabeledImagePath))
-
-if unlabelFeature is None:
-    raise Exception("unlabeledImgFeature is None. Please check the unlabledImageID or unlabledImagePath is valid.")
-
-# Flatten the feature to a vector so that we can use it to calculate the distance.
-unlabelFeature = model.flattenFecture(unlabelFeature, decompMethod)
-
-unlabelProjection = decompFunction.projectFeature(unlabelFeature, decompData, topk)
-
-objLat = decompFunction.getObjLaten(decompData, topk)
-
-# Any better way to calculate the distance?
-for obj in objLat:
-    print(distance(unlabelProjection, obj))
+# TODO: Compare the feature of subject image with others
