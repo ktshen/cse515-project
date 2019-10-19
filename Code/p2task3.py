@@ -1,6 +1,7 @@
 from module.database import FilesystemDatabase
-from module.dimensionReduction import DimReduction
+from module.DimRed import DimRed
 from models import modelFactory
+from pathlib import Path
 import argparse
 from module.handMetadataParser import getFilelistByLabel
 
@@ -32,12 +33,12 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument(
-    "-dis",
-    "--distance",
-    metavar="distance",
+    "-p",
+    "--image_path",
+    metavar="image_path",
     type=str,
-    help="Distance function.",
-    default="l2",
+    help="The folder path of images.",
+    required=True,
 )
 parser.add_argument(
     "-l",
@@ -70,8 +71,8 @@ model = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
-distFunction = args.distance.lower()
 metadataPath = args.metadata
+imagePath = Path(args.image_path)
 label = args.label   # Used to filter such as left-hand or right-hand
 
 # Get filelist according to the label
@@ -81,11 +82,9 @@ filteredFilelist = getFilelistByLabel(metadataPath, label)
 db = FilesystemDatabase(f"{table}_{model}", create=False)
 
 model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
-
 # The imageIdList and featureList should could be mapped to each other.
-featuresList = []
-imageIdList = []
+objFeat = []
+objId = []
 
 # Removed unsed variable in case misusing.
 del table
@@ -97,12 +96,9 @@ for keyId in filteredFilelist:
     # Because the database may store subset of the whole dataset.
     # Some keyId may not exsit in database.
     if feature is not None:
-        imageIdList.append(keyId)
-        featuresList.append(model.deserializeFeature(feature))
-
-decompData = model.dimensionReduction(featuresList, decompFunction)
-
-objLaten = decompFunction.getObjLaten(decompData, topk)
-
-for picId, latn in zip(imageIdList, objLaten):
-    print((picId, objLaten))
+        objId.append(keyId)
+        objFeat.append(
+            model.flattenFecture(model.deserializeFeature(feature), decompMethod)
+        )   
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+latentModel.printLatentSemantics(objId, objFeat, imagePath)

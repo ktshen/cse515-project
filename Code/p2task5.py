@@ -4,6 +4,8 @@ from models import modelFactory
 import argparse
 from module.distanceFunction import distanceFunction
 from module.handMetadataParser import getFilelistByLabel
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import precision_recall_fscore_support
 import cv2
 import numpy as np
 
@@ -94,6 +96,7 @@ label = args.label   # Used to filter such as left-hand or right-hand
 unlabeledImageID = args.image_id
 unlabeledImagePath = args.image_path
 
+
 if unlabeledImageID is None and unlabeledImagePath is None:
     parser.error('Please give unlabled image ID or path in -i / -ip argument.')
 
@@ -124,8 +127,11 @@ for keyId in filteredFilelist:
 
         featuresList.append(model.flattenFecture(model.deserializeFeature(feature), decompMethod))
 
+
 # decompData = model.dimensionReduction(featuresList, decompFunction)
 latenModel = DimRed.createReduction(decompMethod, k=topk, data=featuresList)
+latenSemantic = latenModel.getLatentSemantics()
+latenSemantic = [np.average(latenSemantic,axis=0)]
 
 # Unlabeled Image Feature
 if unlabeledImageID is not None:
@@ -141,10 +147,17 @@ unlabelFeature = model.flattenFecture(unlabelFeature, decompMethod)
 
 unlabelFeature = np.reshape(unlabelFeature, (1, -1))
 
-unlabelProjection = latenModel.transform(unlabelFeature)
+sim = cosine_similarity(latenSemantic, unlabelFeature)
 
-objLat = latenModel.transform(featuresList)
+if sim[0][0]>0.5:
+    print("True")
+else:
+    print("False")
+
+#unlabelProjection = latenModel.transform(unlabelFeature)
+
+#objLat = latenModel.transform(featuresList)
 
 # Any better way to calculate the distance?
-for obj in objLat:
-    print(distance(unlabelProjection, obj))
+#for obj in objLat:
+#    print(distance(unlabelProjection, obj))
