@@ -1,4 +1,5 @@
 import csv
+from collections import defaultdict
 
 
 def getFilelistByLabel(metadataPath, label):
@@ -34,7 +35,26 @@ def getFilelistByLabel(metadataPath, label):
     return filteredFileIDlist
 
 
-if __name__ == "__main__":
-    import sys
+def getFilelistByID(metadataPath):
+    # return two dictionary:
+    # a dictionary contains {subject ID, list:[image ID]}
+    # a dictionary contains {image ID, subject ID}
+    subToImg = defaultdict(list)
+    imgToSub = {}
 
-    print(len(getFilelistByLabel(sys.argv[1], sys.argv[2])))
+    with open(metadataPath, "r") as metadataFile:
+        csvReader = csv.reader(metadataFile, delimiter=',')
+    
+        next(csvReader, None)  # skip the headers
+
+        for row in csvReader:
+            subjectId = int(row[0])
+            imageId = row[7][:-4]
+            subToImg[subjectId].append(imageId)
+            imgToSub[imageId] = subjectId
+
+    return subToImg, imgToSub
+
+
+if __name__ == "__main__":
+    print(getFilelistByID("/Users/bdfish/hw/cse515_data/HandInfo.csv")[0])

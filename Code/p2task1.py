@@ -1,6 +1,7 @@
 from module.database import FilesystemDatabase
-from module.dimensionReduction import DimReduction
+from module.DimRed import DimRed
 from models import modelFactory
+from pathlib import Path
 import argparse
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 1")
@@ -20,6 +21,14 @@ parser.add_argument(
     help="The table will be used.",
     required=True,
 )
+parser.add_argument(
+    "-p",
+    "--image_path",
+    metavar="image_path",
+    type=str,
+    help="The folder path of images.",
+    required=True,
+)
 parser.add_argument("-k", "--topk", metavar="topk", type=int, help="K.", required=True)
 parser.add_argument(
     "-d",
@@ -32,37 +41,26 @@ parser.add_argument(
 args = parser.parse_args()
 
 # extract argument
-model = args.model.lower()
+modelName = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
-
+imagePath = Path(args.image_path)
 # Create database according to model and table name
-db = FilesystemDatabase(f"{table}_{model}", create=False)
-
-# Create database to store decomposition data
-decompDb = FilesystemDatabase(f"{table}_{model}_decomp", create=True)
-
-model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
-
+db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 # Removed unused variable in case misusing.
 del table
 
-idList = []
-featuresList = []
-
 # Load features of images
+model = modelFactory.creatModel(modelName)
+objFeat = []
+objId = []
+
 for keyId in db.keys():
-    idList.append(keyId)
-    featuresList.append(model.deserializeFeature(db.getData(keyId)))
+    objId.append(keyId)
+    objFeat.append(
+        model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+    )
 
-decompData = model.dimensionReduction(featuresList, decompFunction)
-
-decompDb.addData(f"{decompMethod}", decompData, overwrite=True)
-
-# TODO: How to print the original latent vector
-objLaten = decompFunction.getObjLaten(decompData, topk)
-
-for picId, latn in zip(idList, objLaten):
-    print((picId, objLaten))
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+latentModel.printLatentSemantics(objId, objFeat, imagePath)
