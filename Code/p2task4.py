@@ -1,6 +1,6 @@
 import sys
 from module.database import FilesystemDatabase
-from module.dimensionReduction import DimReduction
+from module.DimRed import DimRed
 from pathlib import Path
 from models import modelFactory
 import argparse
@@ -9,7 +9,7 @@ import shutil
 from module.handMetadataParser import getFilelistByLabel
 
 
-parser = argparse.ArgumentParser(description="Phase 2 Task 4")
+parser = argparse.ArgumentParser(description="Phase 2 Task 2")
 parser.add_argument(
     "-m",
     "--model",
@@ -87,7 +87,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # extract argument
-model = args.model.lower()
+modelName = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
@@ -96,15 +96,16 @@ distFunction = args.distance.lower()
 topm = args.topm
 imagePath = Path(args.image_path)
 metadataPath = args.metadata
-label = args.label   # Used to filter such as left-hand or right-hand
+label = args.label
 
 # Get filelist according to the label
 filteredFilelist = getFilelistByLabel(metadataPath, label)
 
 # Create database according to model and table name
-db = FilesystemDatabase(f"{table}_{model}", create=False)
-model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
+db = FilesystemDatabase(f"{table}_{modelName}", create=False)
+
+# Create model, decomposition function, and distance function
+model = modelFactory.creatModel(modelName)
 distance = distanceFunction.createDistance(distFunction)
 
 # The imageIdList and featureList should can be mapped to each other.
@@ -115,7 +116,8 @@ targetIdx = -1
 # Removed unsed variable in case misusing.
 del table
 
-# Load features of images
+objFeat = []
+
 for keyId in filteredFilelist:
     feature = db.getData(keyId)
 
@@ -124,19 +126,20 @@ for keyId in filteredFilelist:
     if feature is not None:
         if keyId == target:
             targetIdx = len(imageIdList)
-        featuresList.append(model.deserializeFeature(feature))
         imageIdList.append(keyId)
+        objFeat.append(
+            model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+        )
 
-decompData = model.dimensionReduction(featuresList, decompFunction)
-resultMatrix = decompFunction.getObjLaten(decompData, topk)
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+resultMatrix = latentModel.transform(objFeat)
 
 targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)
 distanceScoreList = []
 
-# Because the first one(index: 0) is target, the range would be [1: length).
-for featureIdx in range(resultMatrix.shape[0]):
+for featureIdx in range(0, resultMatrix.shape[0]):
     # target image, skip
     if featureIdx == targetIdx:
         continue
@@ -149,7 +152,7 @@ for featureIdx in range(resultMatrix.shape[0]):
 distanceScoreList.sort()
 
 # TODO: We may need to find a new way to represent output.
-outputFolder = Path("output")
+outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{label}_{target}_{topm}")
 outputFolder.mkdir(exist_ok=True)
 
 for i in range(min(topm, len(distanceScoreList))):

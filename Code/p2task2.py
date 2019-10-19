@@ -1,12 +1,11 @@
 import sys
 from module.database import FilesystemDatabase
-from module.dimensionReduction import DimReduction
+from module.DimRed import DimRed
 from pathlib import Path
 from models import modelFactory
 import argparse
 from module.distanceFunction import distanceFunction
 import shutil
-
 
 parser = argparse.ArgumentParser(description="Phase 2 Task 2")
 parser.add_argument(
@@ -62,7 +61,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # extract argument
-model = args.model.lower()
+modelName = args.model.lower()
 table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
@@ -72,38 +71,33 @@ topm = args.topm
 imagePath = Path(args.image_path)
 
 # Create database according to model and table name
-db = FilesystemDatabase(f"{table}_{model}", create=False)
-# Create database to store decomposition data
-decompDb = FilesystemDatabase(f"{table}_{model}_decomp", create=True)
+db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 
 # Create model, decomposition function, and distance function
-model = modelFactory.creatModel(model)
-decompFunction = DimReduction.createReduction(decompMethod, k=topk)
+model = modelFactory.creatModel(modelName)
 distance = distanceFunction.createDistance(distFunction)
 
-# Get decomposition data
-decompData = decompDb.getData(f"{decompMethod}")
-
-if not decompData:
-    raise Exception("Cannot find {decompMethod}, please execute p2task1 first.")
-    sys.exit(1)
-
-
 # The imageIdList and featureList should can be mapped to each other.
+featuresList = []
 imageIdList = []
 targetIdx = -1
 
 # Removed unsed variable in case misusing.
 del table
 
-# Load features of images
+objFeat = []
+
 for idx, keyId in enumerate(db.keys()):
     if target == keyId:
         targetIdx = idx
     imageIdList.append(keyId)
+    objFeat.append(
+        model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
+    )
 
-# TODO: We have to ensure whether the file idx could be directly map to the data transform matrix.
-resultMatrix = decompFunction.getObjLaten(decompData, topk)
+latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+resultMatrix = latentModel.transform(objFeat)
+
 targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)
@@ -122,13 +116,15 @@ for featureIdx in range(0, resultMatrix.shape[0]):
 distanceScoreList.sort()
 
 # TODO: We may need to find a new way to represent output.
-outputFolder = Path("output")
+outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{target}_{topm}")
 outputFolder.mkdir(exist_ok=True)
 
 for i in range(min(topm, len(distanceScoreList))):
     score = distanceScoreList[i][0]
     imageId = distanceScoreList[i][1]
-    shutil.copyfile(imagePath / (imageId + ".jpg"), outputFolder / f"{i+1}_{imageId}_{score}.jpg")
+    shutil.copyfile(
+        imagePath / (imageId + ".jpg"), outputFolder / f"{i+1}_{imageId}_{score}.jpg"
+    )
     print(f"Rank: {i+1}  ID: {imageId}  Score: {score}")
 
 print(f"The result images have been written to folder {outputFolder}/.")
