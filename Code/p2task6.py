@@ -87,7 +87,10 @@ if not target_sub_feat:
 
 for key in db.keys():
     subject_id = imgToSub.get(key)
-    if subject_img_dic_pool.get(subject_id) is None:
+
+    if int(subject_id) == int(subjectID):
+        continue
+    elif subject_img_dic_pool.get(subject_id) is None:
         subject_img_dic_pool[subject_id] = {
             'image_list' : [key],
             'flatten_feature':[],
