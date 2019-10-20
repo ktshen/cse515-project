@@ -117,9 +117,9 @@ python p2task7.py -k 10 -img ~/hw/cse515_data/Hands/
 ```
 
 #### Task 8 example
-For task 8, number of top k latent semantics and the directory of images
+For task 8, number of top k latent semantics, the database table name, and the metadata path.
 ```Shell
-python p2task8.py -k 10 -img ~/hw/cse515_data/Hands/ -meta ~/hw/cse515_data/HandInfo.csv
+python p2task8.py -k 5 -meta ~/hw/cse515_data/HandInfo.csv -t test
 ```
 
 ## Phase 1
