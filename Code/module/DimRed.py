@@ -55,7 +55,7 @@ class SVD(DimRed):
         print("The SVD latent semantics are:(order, id, dot product value)")
         for order, ls in enumerate(self.svd.components_):
             maxIndex = 0
-            maxProjection = 0
+            maxProjection = float("-inf")
             for index, obj in enumerate(data):
                 projection = np.dot(ls, obj)
                 if projection > maxProjection:
@@ -86,7 +86,7 @@ class NMF(DimRed):
         print("The NMF latent semantics are:(order, id, dot product value)")
         for order, ls in enumerate(self.nmf.components_):
             maxIndex = 0
-            maxProjection = 0
+            maxProjection = float("-inf")
             for index, obj in enumerate(data):
                 projection = np.dot(ls, obj)
                 if projection > maxProjection:
@@ -124,7 +124,7 @@ class PCA(DimRed):
         print("The PCA latent semantics are:(order, id, dot product value)")
         for order, ls in enumerate(self.pca.components_):
             maxIndex = 0
-            maxProjection = 0
+            maxProjection = float("-inf")
             for index, obj in enumerate(data):
                 projection = np.dot(ls, obj)
                 if projection > maxProjection:
@@ -156,7 +156,7 @@ class LDA(DimRed):
         print("The LDA latent semantics are:(order, id, dot product value)")
         for order, ls in enumerate(self.lda.components_):
             maxIndex = 0
-            maxProjection = 0
+            maxProjection = float("-inf")
             for index, obj in enumerate(data):
                 projection = np.dot(ls, obj)
                 if projection > maxProjection:
