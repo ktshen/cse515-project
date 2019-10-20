@@ -132,6 +132,11 @@ for keyId in filteredFilelist:
             model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
         )
 
+# Exit if we cannot find the target image.
+if targetIdx == -1:
+    print(f"{target} is not in database or is not belonged to the label.")
+    sys.exit(1)
+
 # Create latent semantics
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
 # Transform data
