@@ -5,7 +5,7 @@ from module.DimRed import DimRed
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Get necessary arguments
-parser = argparse.ArgumentParser(description="Phase 2 Task 7")
+parser = argparse.ArgumentParser(description="Phase 2 Task 8")
 parser.add_argument("-k", "--topk", metavar="topk", type=int, help="K.", required=True)
 parser.add_argument(
     "-img",
@@ -29,10 +29,13 @@ image_directory = args.image_dir
 meta_directory = args.meta_dir
 
 # Construct matrix with image and meta space combined
+print(f"Reading image files")
 RAR = RGBtoArrayReader(image_directory, flatten=True)
+print(f"Flatten the image data and generate one-hot vector")
 images, flatten_images_array, img_shape = get_image_array_with_metadata(meta_directory, RAR)
 
 # Perform NMF process
+print("Processing NMF, please wait")
 nmf = DimRed.createReduction('nmf', k=topk, data=flatten_images_array)
 
 print("Top-k latent semantics in the image-space -> (order, term)")

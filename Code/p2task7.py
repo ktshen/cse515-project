@@ -11,7 +11,7 @@ from pathlib import Path
 from collections import defaultdict
 import numpy as np
 
-parser = argparse.ArgumentParser(description="Phase 2 Task 6")
+parser = argparse.ArgumentParser(description="Phase 2 Task 7")
 parser.add_argument(
     "-t",
     "--table",
