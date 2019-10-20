@@ -1,5 +1,6 @@
 import csv
 from collections import defaultdict
+import numpy as np
 
 
 def getFilelistByLabel(metadataPath, label):
@@ -44,7 +45,7 @@ def getFilelistByID(metadataPath):
 
     with open(metadataPath, "r") as metadataFile:
         csvReader = csv.reader(metadataFile, delimiter=',')
-    
+
         next(csvReader, None)  # skip the headers
 
         for row in csvReader:
@@ -54,6 +55,44 @@ def getFilelistByID(metadataPath):
             imgToSub[imageId] = subjectId
 
     return subToImg, imgToSub
+
+
+def getFilelistWithOneHot(metadataPath):
+    # return a dictionary: image ID -> one-hot array
+    imgToOnehot = {}
+
+    with open(metadataPath, "r") as metadataFile:
+        csvReader = csv.reader(metadataFile, delimiter=',')
+
+        next(csvReader, None)  # skip the headers
+
+        for row in csvReader:
+            imageId = row[7][:-4]
+            onehot = np.zeros(8)
+
+            if row[6].strip().split(' ')[1] == "left":
+                onehot[0] = 1.0
+            else:
+                onehot[1] = 1.0
+
+            if row[6].strip().split(' ')[0] == "dorsal":
+                onehot[2] = 1.0
+            else:
+                onehot[3] = 1.0
+
+            if row[4] == '1':
+                onehot[4] = 1.0
+            else:
+                onehot[5] = 1.0
+
+            if row[2] == 'male':
+                onehot[6] = 1.0
+            else:
+                onehot[7] = 1.0
+
+            imgToOnehot[imageId] = onehot
+
+    return imgToOnehot
 
 
 if __name__ == "__main__":
