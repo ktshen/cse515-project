@@ -74,7 +74,6 @@ class FilesystemDatabase(Database):
 
     def getData(self, key):
         dataPath = self._getDataPathByKey(key)
-
         data = None
 
         if os.path.exists(dataPath):
