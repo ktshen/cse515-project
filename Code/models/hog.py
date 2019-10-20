@@ -84,4 +84,5 @@ class HOG(Model):
         return dimRed(featureMatrix, k)
 
     def flattenFecture(self, feature, dimRedName = None):
-        return feature.ravel()
+        # scale up 10 times
+        return np.array(feature.ravel()) * 100
