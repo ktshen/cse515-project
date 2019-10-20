@@ -98,10 +98,10 @@ imagePath = Path(args.image_path)
 metadataPath = args.metadata
 label = args.label
 
-# Get filelist according to the label
+# Get all image id with the specified label
 filteredFilelist = getFilelistByLabel(metadataPath, label)
 
-# Create database according to model and table name
+# Open database
 db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 
 # Create model, decomposition function, and distance function
@@ -118,6 +118,7 @@ del table
 
 objFeat = []
 
+# Load data
 for keyId in filteredFilelist:
     feature = db.getData(keyId)
 
@@ -131,7 +132,9 @@ for keyId in filteredFilelist:
             model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
         )
 
+# Create latent semantics
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+# Transform data
 resultMatrix = latentModel.transform(objFeat)
 
 targetFeature = resultMatrix[targetIdx]
@@ -151,7 +154,7 @@ for featureIdx in range(0, resultMatrix.shape[0]):
 
 distanceScoreList.sort()
 
-# TODO: We may need to find a new way to represent output.
+# Output data
 outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{label}_{target}_{topm}")
 outputFolder.mkdir(exist_ok=True)
 

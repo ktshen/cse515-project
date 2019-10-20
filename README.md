@@ -1,36 +1,63 @@
 # cse515p2
 
-
 ## Phase 2
+Note: Please run phase 1 task 2 first to create descriptor database before running any of the following tasks.
+
+Option:
+
+-m model: 
+- cm(color moment)
+- lbp(local binary pattern)
+- hog(histograms of oriented gradients)
+- sift(scale-invariant feature transform) 
+
+-t table: The name that has been used when creating descriptor database.
+
+-k the number of latent semantics.
+
+-d decomposition method: 
+- svd(Singular value decomposition)
+- pca(Principal component analysis)
+- lda(Latent Dirichlet allocation)
+- nmf(Non-negative matrix factorization)
+
+-p image dictionary path
+
+-i queried image id
+
+-mi the number of the query results(k)
+
+-meta metadata(HandInfo.csv) path
+
+-l label
+- l -> left-hand
+- r -> right-hand
+- d -> dorsal
+- p -> palmar
+- a -> accessories
+- m -> male
+- f -> female
 
 #### Task 1 example:
-Note: Please run phase 1 task 2 first so that can decrease the time to get image features.
 
-TODO: We need to confirm whether we can use phase 1 task 2 to build database before phase 2 demo.
+Using model color moments, load "test" table, topk is 5, image directory is .../img, and the method of dimension reduction is svd.
 
-Using model color moments, load "test" table, topk is 5, image directory is .../imgPath, and the method of dimension reduction is svd.
 ```Shell
-python p2task1.py -m cm -t test -k 5 -p .../imgPath -d svd
+python p2task1.py -m cm -t test -k 5 -d svd -p .../img
 ```
 
 
 #### Task 2 example:
-Note: Please run phase 1 task 2 first to build database.
-
-TODO: We may need to find a new way to represent output.
 
 Using color moments, load "test" table, topk is 10, the method of dimension reduction is svd, target ID is Hand\_0008110, find m(10) similar images, and the path of dataset is followed by `-p`.
 
 ```Shell
-python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset
+python p2task2.py -m cm -t test -k 10 -d svd -i Hand_0008110 -mi 10 -p .../img
 ```
 
 #### Task 3 example:
-Note: Please run phase 1 task 2 first to build database.
 
-TODO: We need to confirm if task 3 is combination of task 1 with label.
-
-In this task, I added two argument: -meta for metadata path and `-l` for label.
+Compared to task 1, two argument are added: -meta for metadata path and `-l` for label.
 
 Metadata can be downloaded from the following link. Please download **csv** file.
 
@@ -38,7 +65,7 @@ Metadata can be downloaded from the following link. Please download **csv** file
 
 (*.csv) [download](https://drive.google.com/open?id=1RC86-rVOR8c93XAfM9b9R45L7C2B0FdA) (759 KB)
 
-According to project specification, we need to process 8 types of label. Please use **one character followed** by `-l` to indicate what label you want.
+Please use **one character followed** by `-l` to indicate what label you want.
 
 - l -> left-hand
 - r -> right-hand
@@ -51,15 +78,15 @@ According to project specification, we need to process 8 types of label. Please 
 The following example is to process images which are left-hand.
 
 ```Shell
-python p2task3.py -m cm -t test -k 5 -p .../imgPath -d svd -meta ~/hw/cse515_data/HandInfo.csv -l l
+python p2task3.py -m cm -t test -k 5 -p .../img -d svd -meta .../HandInfo.csv -l l
 ```
 
 #### Task 4 example:
 
-Task 4 is very similar to task 2. But we add some arguments to find some images with specific label from metadata.
+Compared to task 2, two argument are added: -meta for metadata path and `-l` for label.
 
 ```Shell
-python p2task4.py -m cm -t test -k 5 -d svd -meta ~/hw/cse515_data/HandInfo.csv -l l -mi 5 -p ~/hw/cse515_data/CSE\ 515\ Fall19\ -\ Smaller\ Dataset -i Hand_0008110
+python p2task4.py -m cm -t test -k 5 -d svd -mi 5 -p .../img -i Hand_0008110 -meta .../HandInfo.csv -l l
 ```
 
 #### Task 5 example:

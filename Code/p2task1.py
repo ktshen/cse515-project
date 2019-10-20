@@ -46,21 +46,25 @@ table = args.table.lower()
 topk = args.topk
 decompMethod = args.method.lower()
 imagePath = Path(args.image_path)
-# Create database according to model and table name
+
+# Open database according to model and table name
 db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 # Removed unused variable in case misusing.
 del table
 
-# Load features of images
-model = modelFactory.creatModel(modelName)
 objFeat = []
 objId = []
+# Instantiate model
+model = modelFactory.creatModel(modelName)
 
+# Load data from database
 for keyId in db.keys():
     objId.append(keyId)
     objFeat.append(
         model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
     )
 
+# Create latent semantics
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+# Output results
 latentModel.printLatentSemantics(objId, objFeat, imagePath)

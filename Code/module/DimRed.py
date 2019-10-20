@@ -97,7 +97,8 @@ class NMF(DimRed):
                 shutil.copyfile(
                     imagePath / (ids[maxIndex] + ".jpg"), outputFolder / f"{order+1}latent semantics_{ids[maxIndex]}.jpg"
                 )
-                print(f"The result images have been written to folder {outputFolder}/.")
+        if imagePath:
+            print(f"The result images have been written to folder {outputFolder}/.")
 
     def transform(self, data):
         return self.nmf.transform(data)

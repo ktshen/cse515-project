@@ -75,12 +75,13 @@ metadataPath = args.metadata
 imagePath = Path(args.image_path)
 label = args.label   # Used to filter such as left-hand or right-hand
 
-# Get filelist according to the label
+# Get all image id with the specified label
 filteredFilelist = getFilelistByLabel(metadataPath, label)
 
-# Create database according to model and table name
+# Open database
 db = FilesystemDatabase(f"{table}_{model}", create=False)
 
+# Create model
 model = modelFactory.creatModel(model)
 # The imageIdList and featureList should could be mapped to each other.
 objFeat = []
@@ -100,5 +101,7 @@ for keyId in filteredFilelist:
         objFeat.append(
             model.flattenFecture(model.deserializeFeature(feature), decompMethod)
         )   
+# Create latent semantics
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+# Output results
 latentModel.printLatentSemantics(objId, objFeat, imagePath)

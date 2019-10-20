@@ -73,7 +73,7 @@ imagePath = Path(args.image_path)
 # Create database according to model and table name
 db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 
-# Create model, decomposition function, and distance function
+# Create model and distance function
 model = modelFactory.creatModel(modelName)
 distance = distanceFunction.createDistance(distFunction)
 
@@ -87,6 +87,7 @@ del table
 
 objFeat = []
 
+# Load data and map queried index
 for idx, keyId in enumerate(db.keys()):
     if target == keyId:
         targetIdx = idx
@@ -95,9 +96,11 @@ for idx, keyId in enumerate(db.keys()):
         model.flattenFecture(model.deserializeFeature(db.getData(keyId)), decompMethod)
     )
 
+# Create latent semantics
 latentModel = DimRed.createReduction(decompMethod, k=topk, data=objFeat)
+# Transform data
 resultMatrix = latentModel.transform(objFeat)
-
+# Map queried feature
 targetFeature = resultMatrix[targetIdx]
 
 # This list will store (score, image ID)
@@ -115,10 +118,9 @@ for featureIdx in range(0, resultMatrix.shape[0]):
 
 distanceScoreList.sort()
 
-# TODO: We may need to find a new way to represent output.
+# Output results
 outputFolder = Path(f"{modelName}_{decompMethod}_{topk}_{target}_{topm}")
 outputFolder.mkdir(exist_ok=True)
-
 for i in range(min(topm, len(distanceScoreList))):
     score = distanceScoreList[i][0]
     imageId = distanceScoreList[i][1]
