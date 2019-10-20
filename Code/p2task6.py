@@ -39,12 +39,22 @@ parser.add_argument(
     required=True
 )
 
+parser.add_argument(
+    "-p",
+    "--image_path",
+    metavar="image_path",
+    type=str,
+    help="The folder path of images.",
+    required=True,
+)
+
 args = parser.parse_args()
 
 # extract argument
 table = args.table.lower()
 subjectID = args.subject_id
 metadataPath = Path(args.metadata)
+imagePath = args.image_path
 
 # Get all models and dimention reduction methods
 models = modelFactory.getSupportModel()
@@ -132,9 +142,10 @@ for key,value in subject_img_dic_pool.items():
 simPair = sorted(simPair,key = lambda x: x[1],reverse=True)
 print("Top 3 Subject ID: ",simPair[0][0],simPair[1][0],simPair[2][0])
 
-image1 = cv2.imread("dataset/"+subject_img_dic_pool[simPair[0][0]]['image_list'][0]+'.jpg')
-image2 = cv2.imread("dataset/"+subject_img_dic_pool[simPair[1][0]]['image_list'][0]+'.jpg')
-image3 = cv2.imread("dataset/"+subject_img_dic_pool[simPair[2][0]]['image_list'][0]+'.jpg')
+image1 = cv2.imread(imagePath+"/"+subject_img_dic_pool[simPair[0][0]]['image_list'][0]+'.jpg')
+image2 = cv2.imread(imagePath+"/"+subject_img_dic_pool[simPair[1][0]]['image_list'][0]+'.jpg')
+image3 = cv2.imread(imagePath+"/"+subject_img_dic_pool[simPair[2][0]]['image_list'][0]+'.jpg')
+
 cv2.imshow("top1",image1)
 cv2.imshow("top2",image2)
 cv2.imshow("top3",image3)

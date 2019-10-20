@@ -9,7 +9,7 @@ from sklearn.metrics import precision_recall_fscore_support
 import cv2
 import numpy as np
 
-parser = argparse.ArgumentParser(description="Phase 2 Task 4")
+parser = argparse.ArgumentParser(description="Phase 2 Task 5")
 parser.add_argument(
     "-m",
     "--model",

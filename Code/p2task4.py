@@ -9,7 +9,7 @@ import shutil
 from module.handMetadataParser import getFilelistByLabel
 
 
-parser = argparse.ArgumentParser(description="Phase 2 Task 2")
+parser = argparse.ArgumentParser(description="Phase 2 Task 4")
 parser.add_argument(
     "-m",
     "--model",
