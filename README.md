@@ -105,9 +105,9 @@ python p2task5.py -m hog -t test -k 5 -d svd -l l -meta ~/hw/cse515_data/HandInf
 
 #### Task 6 example:
 
-For task 6, only table name and subject ID are necessary.
+For task 6, we need to specify the subject ID by `-s` argument.
 ```Shell
-python p2task6.py -t test -i Hand_0000002
+python p2task6.py -t test -s 27 -meta HandInfo.csv -p dataset
 ```
 
 #### Task 7 example
