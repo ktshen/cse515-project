@@ -5,17 +5,17 @@ Note: Please run phase 1 task 2 first to create descriptor database before runni
 
 Option:
 
--m model: 
+-m model:
 - cm(color moment)
 - lbp(local binary pattern)
 - hog(histograms of oriented gradients)
-- sift(scale-invariant feature transform) 
+- sift(scale-invariant feature transform)
 
 -t table: The name that has been used when creating descriptor database.
 
 -k the number of latent semantics.
 
--d decomposition method: 
+-d decomposition method:
 - svd(Singular value decomposition)
 - pca(Principal component analysis)
 - lda(Latent Dirichlet allocation)
@@ -111,9 +111,9 @@ python p2task6.py -t test -i Hand_0000002
 ```
 
 #### Task 7 example
-For task 7, number of top k latent semantics and the directory of images
+For task 7, number of top k latent semantics.
 ```Shell
-python p2task7.py -k 10 -img ~/hw/cse515_data/Hands/
+python p2task7.py -t test -k 10 -meta ~/hw/cse515_data/HandInfo.csv
 ```
 
 #### Task 8 example

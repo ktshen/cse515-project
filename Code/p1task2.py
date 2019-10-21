@@ -21,7 +21,6 @@ parser.add_argument(
     metavar="model",
     type=str,
     help="The model will be used.",
-    required=True,
 )
 parser.add_argument(
     "-t",
@@ -33,35 +32,38 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
 inputPath = Path(args.input_path)
-modelName = args.model.lower()
 table = args.table.lower()
 
-# Create filesystem database with SIFT
-db = FilesystemDatabase(f"{table}_{modelName}", create=True)
+# All models is a list stored all model we would like to use this time.
+# If the model argument are None, the build all model.
+if args.model:
+    allModels = [args.model.lower()]
+else:
+    allModels = modelFactory.getSupportModel()
 
-model = modelFactory.creatModel(modelName)
+for modelName in allModels:
+    print(f"Building a table {table} for model {modelName}")
+    # Create filesystem database with SIFT
+    db = FilesystemDatabase(f"{table}_{modelName}", create=True)
 
-# Remove unuse variable in case misusing.
-del modelName
-del table
+    model = modelFactory.creatModel(modelName)
 
-SUPPORT_FILE_TYPES = [".jpg"]
+    SUPPORT_FILE_TYPES = [".jpg"]
 
-allFiles = []
+    allFiles = []
 
-for fileName in os.listdir(inputPath):
-    for extension in SUPPORT_FILE_TYPES:
-        if fileName.endswith(extension):
-            allFiles.append(inputPath / fileName)
-            break
+    for fileName in os.listdir(inputPath):
+        for extension in SUPPORT_FILE_TYPES:
+            if fileName.endswith(extension):
+                allFiles.append(inputPath / fileName)
+                break
 
-for i, imgFile in enumerate(allFiles):
-    # Convert Path to str since imread do not recognize Path
-    if db.getData(imgFile.stem) is None:
-        img = cv.imread(str(imgFile))
-        features = model.extractFeatures(img)
-        featuresData = model.serializeFeature(features)
-        db.addData(imgFile.stem, featuresData)
-        print(f"{len(allFiles)}: {i+1} processed.")
+    for i, imgFile in enumerate(allFiles):
+        # Convert Path to str since imread do not recognize Path
+        if db.getData(imgFile.stem) is None:
+            img = cv.imread(str(imgFile))
+            features = model.extractFeatures(img)
+            featuresData = model.serializeFeature(features)
+            db.addData(imgFile.stem, featuresData)
+            print(f"{len(allFiles)}: {i+1} processed.")
