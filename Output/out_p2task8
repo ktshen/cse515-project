@@ -1,0 +1,24 @@
+
+python p2task8.py -k 5 -meta HandInfo.csv -t test
+
+Loading data from database
+Doing Dimension Reduction
+Building a binary image-metadata matrix
+Doing NMF with image-metadata matrix
+Top-k latent semantics in the image-space -> (order, term)
+(1, array([6.77853725, 7.87098216, 3.4830974 , 4.32637003, 3.46329011]))
+(2, array([0., 0., 0., 0., 0.]))
+(3, array([0., 0., 0., 0., 0.]))
+(4, array([4.62809721, 4.64372488, 1.92405935, 1.18598177, 1.31337197]))
+(5, array([0.03770874, 0.54873317, 0.19034714, 0.6640715 , 0.41219188]))
+Top-k latent semantics in the metadata-space -> (order, term)
+(1, array([7.34236819e+00, 7.28264968e+00, 1.04371123e+01, ...,
+       4.06254305e-03, 0.00000000e+00, 7.36921603e-03]))
+(2, array([2.34420860e+00, 0.00000000e+00, 0.00000000e+00, ...,
+       2.47994753e-03, 2.32172861e-03, 2.14517077e-03]))
+(3, array([5.1098864 , 0.        , 0.        , ..., 0.00717239, 0.01077567,
+       0.        ]))
+(4, array([0.89073344, 2.25577673, 4.25075462, ..., 0.00571543, 0.        ,
+       0.00564985]))
+(5, array([2.97788119e+00, 1.30704561e+00, 1.39108262e+00, ...,
+       2.63568857e-03, 1.72064837e-04, 3.32006721e-03]))

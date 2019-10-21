@@ -1,0 +1,3 @@
+python p2task6.py -t test -s 27 -meta HandInfo.csv -p dataset
+
+Top 3 Subject ID:  9000000 25 1022

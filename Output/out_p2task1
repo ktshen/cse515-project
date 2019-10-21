@@ -1,0 +1,9 @@
+Commandline: python p2task1.py -m cm -t test -k 5 -d svd -p dataset/ > out_p2task1
+
+The SVD latent semantics are:(order, id, dot product value)
+(1, 'Hand_0000302') 4239.304110052057
+(2, 'Hand_0000283') 604.0573987635471
+(3, 'Hand_0001012') 471.90682566238286
+(4, 'Hand_0009350') 384.5043781975503
+(5, 'Hand_0000122') 263.55987862911525
+The result images have been written to folder SVD latent semantics/.

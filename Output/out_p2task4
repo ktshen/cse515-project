@@ -1,0 +1,8 @@
+Commandline: python p2task4.py -m cm -t test -k 5 -d svd -mi 5 -p dataset/ -i Hand_0000200 -meta HandInfo.csv -l l >out_p2task4
+
+Rank: 1  ID: Hand_0000199  Score: 70.40663022701925
+Rank: 2  ID: Hand_0000488  Score: 125.5927661698042
+Rank: 3  ID: Hand_0000330  Score: 144.0772615836019
+Rank: 4  ID: Hand_0000490  Score: 146.079243917939
+Rank: 5  ID: Hand_0000283  Score: 157.17687589818507
+The result images have been written to folder cm_svd_5_l_Hand_0000200_5/.
