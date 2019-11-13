@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description="Phase 3 Pre-process")
 parser.add_argument(
     "-p",
     "--labeled_image_path",
-    metavar="labeled_path",
+    metavar="labeled_image_path",
     type=str,
     help="The folder path of labeled images.",
     required=True
@@ -19,7 +19,7 @@ parser.add_argument(
 parser.add_argument(
     "-unp",
     "--unlabeled_image_path",
-    metavar="unlabeled_path",
+    metavar="unlabeled_image_path",
     type=str,
     help="The folder path of unlabeled images.",
     required=True
@@ -35,19 +35,21 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-labeledPath = Path(args.labeled_path)
-unlabeledPath = Path(args.unlabeled_path)
+labeledPath = Path(args.labeled_image_path)
+unlabeledPath = Path(args.unlabeled_image_path)
 table = args.table.lower()
 
 usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
-allFile = {}
+# usedModels = ["lbp"] #task 1 uses these three models
+
+allFile = []
 
 for fileName in os.listdir(labeledPath):
     if fileName.endswith(".jpg"):
-        allFile.add(labeledPath / fileName)
+        allFile.append(labeledPath / fileName)
 for fileName in os.listdir(unlabeledPath):
     if fileName.endswith(".jpg"):
-        allFile.add(unlabeledPath / fileName)
+        allFile.append(unlabeledPath / fileName)
         
 print(f"{len(allFile)} images.")
 
