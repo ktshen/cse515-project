@@ -23,7 +23,7 @@ class LocalBP(Model):
         widthOfWindow=100,
         heightOfWindow=100,
         numOfPoints=8,
-        radius=2,
+        radius=1,
         method="uniform",
     ):
         # model parameters
