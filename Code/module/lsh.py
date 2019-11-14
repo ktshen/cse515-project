@@ -1,7 +1,7 @@
 import numpy as np
 import collections
-from itertools import permutations
 from module.distanceFunction import distanceFunction
+from more_itertools import distinct_permutations
 
 """
 The foundation of this implementation is based on Basic LSH Indexing mentioned in the following paper:
@@ -37,7 +37,9 @@ class LSH:
         self.images = list(self.dataset.keys())
         self.data_matrix = np.asarray(list(self.dataset.values()))
         self.feature_size = self.data_matrix.shape[1]
+        print("Building structure...")
         for layer in range(self.L_layers):
+            print(f"Creating {layer}-layer for current structure")
             new_hash_table = HashTable(self.k_hashes_per_layer, self.feature_size, self.W_parameter)
             for index, vector in enumerate(self.data_matrix):
                 new_hash_table[vector] = self.images[index]
@@ -58,6 +60,7 @@ class LSH:
                 - query_image: the target image
                 - t: t nearest neighbors
         """
+        print(f"Getting {t} most similar images of {query_image} from dataset...")
         match_length = self.k_hashes_per_layer
         query_vector = self.dataset[query_image]
         candidates = self.get_candidates(query_image, t)
@@ -120,9 +123,9 @@ class LSH:
 
         for query_code in query_code_for_each_hash:
             permutation = []
-            for perm in set(permutations(positions)):
+            for perm in distinct_permutations(positions):
                 code = ""
-                for idx, ch in enumerate(perm):
+                for idx, ch in enumerate(''.join(perm)):
                     # If the bit in the position is '1', then change the current bit in code to its opposite one
                     if ch == '1':
                         code += ('1' if query_code[idx] == '0' else '0')
