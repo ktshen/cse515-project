@@ -1,5 +1,47 @@
 # cse515p2
 
+## Phase 3
+Note: Please run phase 1 task 2 first to cretea descripter database before running any of the following tasks.
+
+Option:
+
+-c classifier
+- svm(Support Vector Machine)
+- dtree(Decision Tree)
+- ppr(Personalized Page Rank)
+
+-m model:
+- cm(color moment)
+- lbp(local binary pattern)
+- hog(histograms of oriented gradients)
+- sift(scale-invariant feature transform)
+
+-t table: The name that has been used when creating descriptor database.
+
+-k the number of latent semantics.
+
+-d decomposition method:
+- svd(Singular value decomposition)
+- pca(Principal component analysis)
+- lda(Latent Dirichlet allocation)
+- nmf(Non-negative matrix factorization)
+
+-l labeled image folder path
+
+-u unlabeled image folder path
+
+-meta metadata(.csv) path
+
+-tmeta metadata(.csv) path for unlabeled / test images folder.
+
+#### Task 4 example:
+
+
+```Shell
+python p3task4.py -l ~/hw/cse515_data/phase3_sample_data/Labelled/Set1/ -u ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv -d svd -k 20 -t Set1 -m lbp -c svm
+```
+
+
 ## Phase 2
 Note: Please run phase 1 task 2 first to create descriptor database before running any of the following tasks.
 

@@ -3,6 +3,42 @@ from collections import defaultdict
 import numpy as np
 
 
+""" Get the file list by aspect of hand(dorsal/palmar)
+    This function is used for phase 3.
+
+Raises:
+    Exception: [description]
+
+Returns:
+    [type] -- [description]
+"""
+def getFileListByAspectOfHand(metadataPath):
+
+    dorsalFileIDList = []
+    palmarFileIDList = []
+    fileIDToLabelDict = {}
+
+    with open(metadataPath, "r") as metadataFile:
+        csvReader = csv.reader(metadataFile, delimiter=',')
+
+        # https://stackoverflow.com/questions/14257373/skip-the-headers-when-editing-a-csv-file-using-python
+        next(csvReader, None)  # skip the headers
+
+        for row in csvReader:
+            dorsal = row[7].strip().split(' ')[0] == "dorsal"
+
+            fileID = row[8][:-4]
+
+            if dorsal:
+                dorsalFileIDList.append(fileID)
+                fileIDToLabelDict[fileID] = True
+            else:
+                palmarFileIDList.append(fileID)
+                fileIDToLabelDict[fileID] = False
+
+    return dorsalFileIDList, palmarFileIDList, fileIDToLabelDict
+
+
 def getFilelistByLabel(metadataPath, label):
     metadataLabelsChecker = {
         "l": lambda row: row[6].strip().split(' ')[1] == "left",
