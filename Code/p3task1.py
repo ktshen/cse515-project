@@ -6,6 +6,7 @@ from module.handMetadataParser import getFilelistByLabel
 from module.DimRed import DimRed
 from models import modelFactory
 from module.database import FilesystemDatabase
+from sklearn.metrics.pairwise import cosine_similarity
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 1")
 
@@ -78,10 +79,17 @@ for img in labeledFiles:
     else:
         dorsalImage.append(img)
 
+
+"""
+The first approach is according to the vector's P-norm in SVD latent space.
+We will first measure their accuracies individually and 
+then try to combine them to get a better results.
+"""
+
 # computing latent semantics and projection
 decompMethod = 'svd'
 usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
-
+ 
 db = FilesystemDatabase(f"{table}_cm", create=False)
 model = modelFactory.creatModel("cm")
 palmar_cm = []
@@ -103,7 +111,7 @@ for imgId in unlabeledFiles:
     )
 unlabeled_palmar_cm = palmar_cm_latent.transform(unlabeled_cm)
 unlabeled_dorsal_cm = dorsal_cm_latent.transform(unlabeled_cm)
-
+ 
 db = FilesystemDatabase(f"{table}_lbp", create=False)
 model = modelFactory.creatModel("lbp")
 palmar_lbp = []
@@ -125,7 +133,7 @@ for imgId in unlabeledFiles:
     )
 unlabeled_palmar_lbp = palmar_lbp_latent.transform(unlabeled_lbp)
 unlabeled_dorsal_lbp = dorsal_lbp_latent.transform(unlabeled_lbp)
-
+ 
 db = FilesystemDatabase(f"{table}_hog", create=False)
 model = modelFactory.creatModel("hog")
 palmar_hog = []
@@ -147,20 +155,185 @@ for imgId in unlabeledFiles:
     )
 unlabeled_palmar_hog = palmar_hog_latent.transform(unlabeled_hog)
 unlabeled_dorsal_hog = dorsal_hog_latent.transform(unlabeled_hog)
-
-# combining latent projection and labeling
-cmHit = 0
-lbpHit = 0
-hogHit = 0
-length = len(unlabeledFiles)
-
+ 
+# we use pnorm to measure vector length, then compare length 
+overallRate = 0     #overall correct prediction
+CMRate = 0          #correct prediction using CM
+LBPRate = 0         #correct prediction using LBP
+HOGRate = 0         #correct prediction using HOG
+ 
+noComp = 0          #all models predict wrongly
+ 
+totalNum = len(unlabeledFiles)
+pNorm = 2
+CMfactor = 1
+LBPfactor = 1
+HOGfactor = 1
+ 
 for index, imgId in enumerate(unlabeledFiles):
     isPalmar = imgId in palmarset
-       
-    if isPalmar == (np.linalg.norm(unlabeled_palmar_cm[index]) > np.linalg.norm(unlabeled_dorsal_cm[index])):
-        cmHit+=1
-    if isPalmar == (np.linalg.norm(unlabeled_palmar_lbp[index]) > np.linalg.norm(unlabeled_dorsal_lbp[index])):
-        lbpHit+=1
-    if isPalmar == (np.linalg.norm(unlabeled_palmar_hog[index]) > np.linalg.norm(unlabeled_dorsal_hog[index])):
-        hogHit+=1
-print(f"cm hit rate is {cmHit/length}; lbp hit rate is {lbpHit/length}; hog hit rate is {hogHit/length}")    
+    biasToP = 0
+     
+    cmPlen = np.linalg.norm(unlabeled_palmar_cm[index], ord = pNorm) 
+    cmDlen = np.linalg.norm(unlabeled_dorsal_cm[index], ord = pNorm)
+    CMdiff = (cmPlen - cmDlen) / max(cmPlen, cmDlen)
+    if isPalmar == (CMdiff > 0):
+        CMRate += 1
+#     print(f"CM length diff is {isPalmarCM}")
+     
+    lbpPlen = np.linalg.norm(unlabeled_palmar_lbp[index], ord = pNorm) 
+    lbpDlen = np.linalg.norm(unlabeled_dorsal_lbp[index], ord = pNorm)
+    LBPdiff = (lbpPlen - lbpDlen) / max(lbpPlen, lbpDlen)
+    if isPalmar == (LBPdiff > 0):
+        LBPRate += 1
+#     print(f"LBP length diff is {isPalmarLBP}")
+ 
+    hogPlen = np.linalg.norm(unlabeled_palmar_hog[index], ord = pNorm) 
+    hogDlen = np.linalg.norm(unlabeled_dorsal_hog[index], ord = pNorm)
+    HOGdiff = (hogPlen - hogDlen) / max(hogPlen, hogDlen)
+    if isPalmar == (HOGdiff > 0):
+        HOGRate += 1
+#     print(f"HOG length diff is {isPalmarHOG}")
+ 
+    biastoP = CMdiff * CMfactor + LBPdiff * LBPfactor + HOGdiff * HOGfactor
+    if isPalmar == (biastoP > 0):
+        overallRate += 1
+    else:
+        if (CMdiff > 0 and LBPdiff > 0 and HOGdiff > 0) or (CMdiff < 0 and LBPdiff < 0 and HOGdiff < 0):
+            noComp += 1
+        else:
+            print(f"the CMdiff is {CMdiff}; the LBPdiff is {LBPdiff}; the HOG is {HOGdiff}")
+         
+print(f"Overall hit rate is {overallRate/totalNum}")
+print(f"CM rate is {CMRate/totalNum}; LBP rate is {LBPRate/totalNum}; HOG rate is {HOGRate/totalNum}")
+print(f"no compensate misses {noComp/(totalNum - overallRate)}")
+
+"""
+The second approach is according to the vector's cosine similarity to SVD latent semantics.
+We will first measure their accuracies individually and 
+then try to combine them to get a better results. After doing some experiments, this method does not perfrom well.
+"""
+
+# # computing latent semantics and projection
+# decompMethod = 'pca'
+# usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
+# 
+# db = FilesystemDatabase(f"{table}_cm", create=False)
+# model = modelFactory.creatModel("cm")
+# palmar_cm = []
+# for imgId in palmarImage:
+#     palmar_cm.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# palmar_cm_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_cm).getLatentSemantics()
+# dorsal_cm = []
+# for imgId in dorsalImage:
+#     dorsal_cm.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# dorsal_cm_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_cm).getLatentSemantics()
+# unlabeled_cm = []
+# for imgId in unlabeledFiles:
+#     unlabeled_cm.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# 
+# db = FilesystemDatabase(f"{table}_lbp", create=False)
+# model = modelFactory.creatModel("lbp")
+# palmar_lbp = []
+# for imgId in palmarImage:
+#     palmar_lbp.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# palmar_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_lbp).getLatentSemantics()
+# dorsal_lbp = []
+# for imgId in dorsalImage:
+#     dorsal_lbp.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# dorsal_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_lbp).getLatentSemantics()
+# unlabeled_lbp = []
+# for imgId in unlabeledFiles:
+#     unlabeled_lbp.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# 
+# db = FilesystemDatabase(f"{table}_hog", create=False)
+# model = modelFactory.creatModel("hog")
+# palmar_hog = []
+# for imgId in palmarImage:
+#     palmar_hog.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# palmar_hog_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_hog).getLatentSemantics()
+# dorsal_hog = []
+# for imgId in dorsalImage:
+#     dorsal_hog.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# dorsal_hog_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_hog).getLatentSemantics()
+# unlabeled_hog = []
+# for imgId in unlabeledFiles:
+#     unlabeled_hog.append(
+#         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
+#     )
+# 
+# # we use pnorm to measure vector length, then compare length 
+# overallRate = 0     #overall correct prediction
+# CMRate = 0          #correct prediction using CM
+# LBPRate = 0         #correct prediction using LBP
+# HOGRate = 0         #correct prediction using HOG
+# 
+# noComp = 0          #all models predict wrongly
+# 
+# totalNum = len(unlabeledFiles)
+# CMfactor = 1
+# LBPfactor = 1
+# HOGfactor = 1
+# 
+# for imgIdx in range(len(unlabeledFiles)):
+#     isPalmar = unlabeledFiles[imgIdx] in palmarset
+#     
+#     cosineSimCMP = 0
+#     cosineSimCMD = 0    
+#     for ls in palmar_cm_latent:
+#         cosineSimCMP += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]
+#     for ls in dorsal_cm_latent:
+#         cosineSimCMD += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]       
+#     if isPalmar == (cosineSimCMP > cosineSimCMD):
+#         CMRate += 1
+#     CMdiff = cosineSimCMP - cosineSimCMD
+#     
+#     cosineSimLBPP = 0
+#     cosineSimLBPD = 0    
+#     for ls in palmar_lbp_latent:
+#         cosineSimLBPP += cosine_similarity(np.array(unlabeled_lbp[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]
+#     for ls in dorsal_lbp_latent:
+#         cosineSimLBPD += cosine_similarity(np.array(unlabeled_lbp[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]        
+#     if isPalmar == (cosineSimLBPP > cosineSimLBPD):
+#         LBPRate += 1
+#     LBPdiff = cosineSimLBPP - cosineSimLBPD
+#     
+#     cosineSimHOGP = 0
+#     cosineSimHOGD = 0    
+#     for ls in palmar_hog_latent:
+#         cosineSimHOGP += cosine_similarity(np.array(unlabeled_hog[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]
+#     for ls in dorsal_hog_latent:
+#         cosineSimHOGD += cosine_similarity(np.array(unlabeled_hog[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]        
+#     if isPalmar == (cosineSimHOGP > cosineSimHOGD):
+#         HOGRate += 1
+#     HOGdiff = cosineSimHOGP - cosineSimHOGD
+# 
+# 
+#     biastoP = CMdiff * CMfactor + LBPdiff * LBPfactor + HOGdiff * HOGfactor
+#     if isPalmar == (biastoP > 0):
+#         overallRate += 1
+#     else:
+#         if (CMdiff > 0 and LBPdiff > 0 and HOGdiff > 0) or (CMdiff < 0 and LBPdiff < 0 and HOGdiff < 0):
+#             noComp += 1
+#         else:
+#             print(f"the CMdiff is {CMdiff}; the LBPdiff is {LBPdiff}; the HOG is {HOGdiff}")
+#         
+# print(f"Overall hit rate is {overallRate/totalNum}")
+# print(f"CM rate is {CMRate/totalNum}; LBP rate is {LBPRate/totalNum}; HOG rate is {HOGRate/totalNum}")
+print(f"no compensate misses {noComp/(totalNum - overallRate)}")
