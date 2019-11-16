@@ -25,6 +25,10 @@ class DimRed(ABC):
     @abstractmethod
     def getLatentSemantics(self):
         pass
+    
+    @abstractmethod
+    def getWeights(self):
+        pass
 
     @classmethod
     def registerMethod(cls, method):
@@ -72,6 +76,9 @@ class SVD(DimRed):
 
     def getLatentSemantics(self):
         return self.svd.components_
+    
+    def getWeights(self):
+        return self.svd.explained_variance_
 
 
 @DimRed.registerMethod
@@ -109,6 +116,9 @@ class NMF(DimRed):
     @property
     def components_(self):
         return self.nmf.components_
+    
+    def getWeights(self):
+        return None
 
 
 @DimRed.registerMethod
@@ -141,6 +151,9 @@ class PCA(DimRed):
 
     def getLatentSemantics(self):
         return self.pca.components_
+    
+    def getWeights(self):
+        return self.pca.explained_variance_
 
 
 @DimRed.registerMethod
@@ -173,3 +186,6 @@ class LDA(DimRed):
 
     def getLatentSemantics(self):
         return self.lda.components_
+    
+    def getWeights(self):
+        return None

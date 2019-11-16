@@ -2,7 +2,7 @@ import argparse
 import os
 import numpy as np
 from pathlib import Path
-from module.handMetadataParser import getFilelistByLabel
+from module.handMetadataParser import getFilelistByLabelP3
 from module.DimRed import DimRed
 from models import modelFactory
 from module.database import FilesystemDatabase
@@ -70,7 +70,7 @@ for fileName in os.listdir(unlabeledPath):
 print(f"{len(labeledFiles)} labeled images and {len(unlabeledFiles)} unlabeled images.")
 
 # get labels
-palmarset = frozenset(getFilelistByLabel(metadataPath, 'p'))
+palmarset = frozenset(getFilelistByLabelP3(metadataPath, 'p'))
 palmarImage = []
 dorsalImage = []
 for img in labeledFiles:
@@ -88,125 +88,103 @@ then try to combine them to get a better results.
 
 # computing latent semantics and projection
 decompMethod = 'svd'
-usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
- 
-db = FilesystemDatabase(f"{table}_cm", create=False)
-model = modelFactory.creatModel("cm")
+usedModels = ["cavg", "hog"] #task 1 uses these three models
+  
+db = FilesystemDatabase(f"{table}_cavg", create=False)
+model = modelFactory.creatModel("cavg")
+
 palmar_cm = []
 for imgId in palmarImage:
     palmar_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
 palmar_cm_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_cm)
+
 dorsal_cm = []
 for imgId in dorsalImage:
     dorsal_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
 dorsal_cm_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_cm)
+
 unlabeled_cm = []
 for imgId in unlabeledFiles:
     unlabeled_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
+    
 unlabeled_palmar_cm = palmar_cm_latent.transform(unlabeled_cm)
 unlabeled_dorsal_cm = dorsal_cm_latent.transform(unlabeled_cm)
- 
-db = FilesystemDatabase(f"{table}_lbp", create=False)
-model = modelFactory.creatModel("lbp")
-palmar_lbp = []
-for imgId in palmarImage:
-    palmar_lbp.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-palmar_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_lbp)
-dorsal_lbp = []
-for imgId in dorsalImage:
-    dorsal_lbp.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-dorsal_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_lbp)
-unlabeled_lbp = []
-for imgId in unlabeledFiles:
-    unlabeled_lbp.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-unlabeled_palmar_lbp = palmar_lbp_latent.transform(unlabeled_lbp)
-unlabeled_dorsal_lbp = dorsal_lbp_latent.transform(unlabeled_lbp)
- 
+  
 db = FilesystemDatabase(f"{table}_hog", create=False)
 model = modelFactory.creatModel("hog")
+
 palmar_hog = []
 for imgId in palmarImage:
     palmar_hog.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
 palmar_hog_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_hog)
+
 dorsal_hog = []
 for imgId in dorsalImage:
     dorsal_hog.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
 dorsal_hog_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_hog)
+
 unlabeled_hog = []
 for imgId in unlabeledFiles:
     unlabeled_hog.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
+    
 unlabeled_palmar_hog = palmar_hog_latent.transform(unlabeled_hog)
 unlabeled_dorsal_hog = dorsal_hog_latent.transform(unlabeled_hog)
- 
+  
 # we use pnorm to measure vector length, then compare length 
 overallRate = 0     #overall correct prediction
 CMRate = 0          #correct prediction using CM
-LBPRate = 0         #correct prediction using LBP
 HOGRate = 0         #correct prediction using HOG
- 
 noComp = 0          #all models predict wrongly
- 
+  
 totalNum = len(unlabeledFiles)
 pNorm = 2
-CMfactor = 1
-LBPfactor = 1
+CMfactor = 50
 HOGfactor = 1
- 
+  
 for index, imgId in enumerate(unlabeledFiles):
-    isPalmar = imgId in palmarset
+#     isPalmar = imgId in palmarset
     biasToP = 0
-     
+      
     cmPlen = np.linalg.norm(unlabeled_palmar_cm[index], ord = pNorm) 
     cmDlen = np.linalg.norm(unlabeled_dorsal_cm[index], ord = pNorm)
     CMdiff = (cmPlen - cmDlen) / max(cmPlen, cmDlen)
-    if isPalmar == (CMdiff > 0):
-        CMRate += 1
-#     print(f"CM length diff is {isPalmarCM}")
-     
-    lbpPlen = np.linalg.norm(unlabeled_palmar_lbp[index], ord = pNorm) 
-    lbpDlen = np.linalg.norm(unlabeled_dorsal_lbp[index], ord = pNorm)
-    LBPdiff = (lbpPlen - lbpDlen) / max(lbpPlen, lbpDlen)
-    if isPalmar == (LBPdiff > 0):
-        LBPRate += 1
-#     print(f"LBP length diff is {isPalmarLBP}")
- 
+#     if isPalmar == (CMdiff > 0):
+#         CMRate += 1     
+  
     hogPlen = np.linalg.norm(unlabeled_palmar_hog[index], ord = pNorm) 
     hogDlen = np.linalg.norm(unlabeled_dorsal_hog[index], ord = pNorm)
     HOGdiff = (hogPlen - hogDlen) / max(hogPlen, hogDlen)
-    if isPalmar == (HOGdiff > 0):
-        HOGRate += 1
-#     print(f"HOG length diff is {isPalmarHOG}")
- 
-    biastoP = CMdiff * CMfactor + LBPdiff * LBPfactor + HOGdiff * HOGfactor
-    if isPalmar == (biastoP > 0):
-        overallRate += 1
+#     if isPalmar == (HOGdiff > 0):
+#         HOGRate += 1
+  
+    biastoP = CMdiff * CMfactor + HOGdiff * HOGfactor
+#     if isPalmar == (biastoP > 0):
+#         overallRate += 1
+#     else:
+#         if (CMdiff > 0 and HOGdiff > 0) or (CMdiff < 0 and HOGdiff < 0):
+#             noComp += 1
+#         else:
+#             print(f"the CMdiff is {CMfactor * CMdiff}; the HOG is {HOGfactor * HOGdiff}")
+          
+# print(f"Overall hit rate is {overallRate/totalNum}")
+# print(f"CM rate is {CMRate/totalNum}; HOG rate is {HOGRate/totalNum}")
+# print(f"no compensate misses {noComp/(totalNum - overallRate)}")
+    if biastoP > 0:
+        print(f"{imgId} is Palmar")
     else:
-        if (CMdiff > 0 and LBPdiff > 0 and HOGdiff > 0) or (CMdiff < 0 and LBPdiff < 0 and HOGdiff < 0):
-            noComp += 1
-        else:
-            print(f"the CMdiff is {CMdiff}; the LBPdiff is {LBPdiff}; the HOG is {HOGdiff}")
-         
-print(f"Overall hit rate is {overallRate/totalNum}")
-print(f"CM rate is {CMRate/totalNum}; LBP rate is {LBPRate/totalNum}; HOG rate is {HOGRate/totalNum}")
-print(f"no compensate misses {noComp/(totalNum - overallRate)}")
+        print(f"{imgId} is Dorsal")
 
 """
 The second approach is according to the vector's cosine similarity to SVD latent semantics.
@@ -215,29 +193,33 @@ then try to combine them to get a better results. After doing some experiments, 
 """
 
 # # computing latent semantics and projection
-# decompMethod = 'pca'
-# usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
-# 
-# db = FilesystemDatabase(f"{table}_cm", create=False)
-# model = modelFactory.creatModel("cm")
+# decompMethod = 'svd'
+# usedModels = ["cavg", "lbp", "hog"] #task 1 uses these three models
+#  
+# db = FilesystemDatabase(f"{table}_cavg", create=False)
+# model = modelFactory.creatModel("cavg")
 # palmar_cm = []
 # for imgId in palmarImage:
 #     palmar_cm.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# palmar_cm_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_cm).getLatentSemantics()
+# CMP = DimRed.createReduction(decompMethod, k=k, data=palmar_cm)
+# palmar_cm_latent = CMP.getLatentSemantics()
+# palmar_cm_weight = CMP.getWeights()
 # dorsal_cm = []
 # for imgId in dorsalImage:
 #     dorsal_cm.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# dorsal_cm_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_cm).getLatentSemantics()
+# CMD = DimRed.createReduction(decompMethod, k=k, data=dorsal_cm)
+# dorsal_cm_latent = CMD.getLatentSemantics()
+# dorsal_cm_weight = CMD.getWeights()
 # unlabeled_cm = []
 # for imgId in unlabeledFiles:
 #     unlabeled_cm.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# 
+#  
 # db = FilesystemDatabase(f"{table}_lbp", create=False)
 # model = modelFactory.creatModel("lbp")
 # palmar_lbp = []
@@ -245,19 +227,23 @@ then try to combine them to get a better results. After doing some experiments, 
 #     palmar_lbp.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# palmar_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_lbp).getLatentSemantics()
+# LBPP = DimRed.createReduction(decompMethod, k=k, data=palmar_lbp)
+# palmar_lbp_latent = LBPP.getLatentSemantics()
+# palmar_lbp_weight = LBPP.getWeights()
 # dorsal_lbp = []
 # for imgId in dorsalImage:
 #     dorsal_lbp.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# dorsal_lbp_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_lbp).getLatentSemantics()
+# LBPD = DimRed.createReduction(decompMethod, k=k, data=dorsal_lbp)
+# dorsal_lbp_latent = LBPD.getLatentSemantics()
+# dorsal_lbp_weight = LBPD.getWeights()
 # unlabeled_lbp = []
 # for imgId in unlabeledFiles:
 #     unlabeled_lbp.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# 
+#  
 # db = FilesystemDatabase(f"{table}_hog", create=False)
 # model = modelFactory.creatModel("hog")
 # palmar_hog = []
@@ -265,47 +251,51 @@ then try to combine them to get a better results. After doing some experiments, 
 #     palmar_hog.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# palmar_hog_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_hog).getLatentSemantics()
+# HOGP = DimRed.createReduction(decompMethod, k=k, data=palmar_hog)
+# palmar_hog_latent = HOGP.getLatentSemantics()
+# palmar_hog_weight = HOGP.getWeights()
 # dorsal_hog = []
 # for imgId in dorsalImage:
 #     dorsal_hog.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# dorsal_hog_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_hog).getLatentSemantics()
+# HOGD = DimRed.createReduction(decompMethod, k=k, data=dorsal_hog)
+# dorsal_hog_latent = HOGD.getLatentSemantics()
+# dorsal_hog_weight = HOGD.getWeights()
 # unlabeled_hog = []
 # for imgId in unlabeledFiles:
 #     unlabeled_hog.append(
 #         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
 #     )
-# 
-# # we use pnorm to measure vector length, then compare length 
+#  
+# # we use cosine similarity to measure
 # overallRate = 0     #overall correct prediction
 # CMRate = 0          #correct prediction using CM
 # LBPRate = 0         #correct prediction using LBP
 # HOGRate = 0         #correct prediction using HOG
-# 
+#  
 # noComp = 0          #all models predict wrongly
-# 
+#  
 # totalNum = len(unlabeledFiles)
 # CMfactor = 1
 # LBPfactor = 1
 # HOGfactor = 1
-# 
+#  
 # for imgIdx in range(len(unlabeledFiles)):
 #     isPalmar = unlabeledFiles[imgIdx] in palmarset
-#     
+#      
 #     cosineSimCMP = 0
 #     cosineSimCMD = 0    
-#     for ls in palmar_cm_latent:
-#         cosineSimCMP += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]
-#     for ls in dorsal_cm_latent:
-#         cosineSimCMD += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]       
+#     for ls in zip(palmar_cm_latent, palmar_cm_weight):
+#         cosineSimCMP += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls[0]).reshape(1, -1))[0][0] * ls[1]
+#     for ls in zip(dorsal_cm_latent, dorsal_cm_weight):
+#         cosineSimCMD += cosine_similarity(np.array(unlabeled_cm[imgIdx]).reshape(1, -1), np.array(ls[0]).reshape(1, -1))[0][0] * ls[1]      
 #     if isPalmar == (cosineSimCMP > cosineSimCMD):
 #         CMRate += 1
 #     CMdiff = cosineSimCMP - cosineSimCMD
 #     
 #     cosineSimLBPP = 0
-#     cosineSimLBPD = 0    
+#     cosineSimLBPD = 0
 #     for ls in palmar_lbp_latent:
 #         cosineSimLBPP += cosine_similarity(np.array(unlabeled_lbp[imgIdx]).reshape(1, -1), np.array(ls).reshape(1, -1))[0][0]
 #     for ls in dorsal_lbp_latent:
@@ -313,7 +303,7 @@ then try to combine them to get a better results. After doing some experiments, 
 #     if isPalmar == (cosineSimLBPP > cosineSimLBPD):
 #         LBPRate += 1
 #     LBPdiff = cosineSimLBPP - cosineSimLBPD
-#     
+#      
 #     cosineSimHOGP = 0
 #     cosineSimHOGD = 0    
 #     for ls in palmar_hog_latent:
@@ -323,8 +313,8 @@ then try to combine them to get a better results. After doing some experiments, 
 #     if isPalmar == (cosineSimHOGP > cosineSimHOGD):
 #         HOGRate += 1
 #     HOGdiff = cosineSimHOGP - cosineSimHOGD
-# 
-# 
+#  
+#  
 #     biastoP = CMdiff * CMfactor + LBPdiff * LBPfactor + HOGdiff * HOGfactor
 #     if isPalmar == (biastoP > 0):
 #         overallRate += 1
@@ -333,7 +323,7 @@ then try to combine them to get a better results. After doing some experiments, 
 #             noComp += 1
 #         else:
 #             print(f"the CMdiff is {CMdiff}; the LBPdiff is {LBPdiff}; the HOG is {HOGdiff}")
-#         
+#          
 # print(f"Overall hit rate is {overallRate/totalNum}")
 # print(f"CM rate is {CMRate/totalNum}; LBP rate is {LBPRate/totalNum}; HOG rate is {HOGRate/totalNum}")
-print(f"no compensate misses {noComp/(totalNum - overallRate)}")
+# print(f"no compensate misses {noComp/(totalNum - overallRate)}")

@@ -71,6 +71,30 @@ def getFilelistByLabel(metadataPath, label):
 
     return filteredFileIDlist
 
+def getFilelistByLabelP3(metadataPath, label):
+    metadataLabelsChecker = {
+        "d": lambda row: row[7].strip().split(' ')[0] == "dorsal",
+        "p": lambda row: row[7].strip().split(' ')[0] == "palmar",
+    }
+    for c in label:
+        if c not in metadataLabelsChecker:
+            raise Exception(f"{label} is not a valid label.")
+
+    filteredFileIDlist = []
+
+    with open(metadataPath, "r") as metadataFile:
+        csvReader = csv.reader(metadataFile, delimiter=',')
+
+        # https://stackoverflow.com/questions/14257373/skip-the-headers-when-editing-a-csv-file-using-python
+        next(csvReader, None)  # skip the headers
+
+        for row in csvReader:
+            for c in label:
+                if metadataLabelsChecker[c](row):
+                    filteredFileIDlist.append(row[8][:-4])
+                    continue  # To ensure we only append one time.
+
+    return filteredFileIDlist
 
 def getFilelistByID(metadataPath):
     # return two dictionary:

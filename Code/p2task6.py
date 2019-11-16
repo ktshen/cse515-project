@@ -71,7 +71,7 @@ smallest_k = 99999
 
 
 db = FilesystemDatabase(f"{table}_cm", create=False)
-model = modelFactory.creatModel('cm')
+model = modelFactory.creatModel('cavg')
 
 # The imageIdList and featureList should could be mapped to each other.
 target_sub_feat = []

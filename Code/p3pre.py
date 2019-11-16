@@ -39,8 +39,8 @@ labeledPath = Path(args.labeled_image_path)
 unlabeledPath = Path(args.unlabeled_image_path)
 table = args.table.lower()
 
-usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
-# usedModels = ["lbp"] #task 1 uses these three models
+# usedModels = ["cm", "lbp", "hog"] #task 1 uses these three models
+usedModels = ["cavg"] #task 1 uses these three models
 
 allFile = []
 
