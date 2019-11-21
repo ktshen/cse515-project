@@ -9,7 +9,7 @@ class SVM(classifier.Classifier):
 
         self._eta = 0.2
         self._regularization = 0.1
-        self._epoch = 100
+        self._epoch = 100000
 
         if dimension is not None:
             # 1 is B
@@ -52,7 +52,7 @@ class SVM(classifier.Classifier):
         if self._w is None:
             raise Exception("Please train SVM model first")
 
-        return np.multiply(self._w, data)
+        return np.dot(self._w, data.T) > 0
 
 
 if __name__ == "__main__":

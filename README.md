@@ -32,13 +32,13 @@ Option:
 
 -meta metadata(.csv) path
 
--tmeta metadata(.csv) path for unlabeled / test images folder.
+-tmeta metadata(.csv) path for unlabeled / test images folder. This is *optional*. If we can provide test label metadata, this task will show the accuracy.
 
 #### Task 4 example:
 
 
 ```Shell
-python p3task4.py -l ~/hw/cse515_data/phase3_sample_data/Labelled/Set1/ -u ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv -d svd -k 20 -t Set1 -m lbp -c svm
+python p3task4.py -c svm -m hog -t set1 -d pca -k 20 -ut tSet1 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv -tmeta ~/hw/cse515_data/phase3_sample_data/unlabelled_set1.csv
 ```
 
 
