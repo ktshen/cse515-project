@@ -77,10 +77,13 @@ class LSH:
         if len(candidates_with_distance) < t:
             print("Only get %s candidates, can't find other possible candidates." % len(candidates_with_distance))
         else:
+            print(f"Total images considered: {len(self.images)}")
             candidates_with_distance = candidates_with_distance[:t]
 
         for index, row in enumerate(candidates_with_distance):
-            print("No.{0}  Image ID: {1}  Distance: {2}".format(index, row[0], row[2]))
+            print("No.{0}  Image ID: {1}  Distance: {2}".format(index+1, row[0], row[2]))
+
+        return candidates_with_distance
 
 
     def get_candidates(self, query_image, t):

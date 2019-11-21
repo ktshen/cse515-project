@@ -1,12 +1,14 @@
 import argparse
+import os
 import numpy as np
 from module.lsh import LSH
 from module.database import FilesystemDatabase
 from models import modelFactory
-from module.distanceFunction import distanceFunction
 from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+# from module.distanceFunction import distanceFunction
 
-np.set_printoptions(threshold=np.inf)
+# np.set_printoptions(threshold=np.inf)
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 5")
 
@@ -58,6 +60,14 @@ parser.add_argument(
     required=True,
 )
 
+parser.add_argument(
+    "-dir",
+    "--imgdir",
+    type=str,
+    help="The image directory",
+    required=True,
+)
+
 # extract argument
 args = parser.parse_args()
 
@@ -67,15 +77,19 @@ query_image = args.image_id
 top_t = args.top_t
 modelName = args.model.lower()
 table = args.table.lower()
+img_dir = args.imgdir
 
 # Load database and create dataset
-print("Loading files...")
+print("Loading files to dataset...")
 db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 model = modelFactory.creatModel(modelName)
 dataset = dict()
 
 for image_id in db.keys():
     dataset[image_id] = model.flattenFecture(model.deserializeFeature(db.getData(image_id)))
+
+# Get the number of total images that are considered
+total_image_amount = len(dataset.keys())
 
 # Scaling
 print("Scaling dataset...")
@@ -92,20 +106,54 @@ lsh = LSH(L_layers, k_hashes)
 lsh.build_structure(dataset)
 
 # Get result
-lsh.get_t_most_similar_images(query_image, top_t)
+candidates = lsh.get_t_most_similar_images(query_image, top_t)
+
+
+# Check image directory exists
+if not os.path.isdir(img_dir):
+    print("Please input valid image directory")
+
+# Initialize matplotlib figure instance
+fig = plt.figure()
+
+
+subplot_col = 3
+subplot_row = (len(candidates)+1) // subplot_col + 1  if (len(candidates)+1) % subplot_col else (len(candidates)+1) // subplot_col
+
+# Read image file and plot it on the figure
+def plot_image(imagename, title, index):
+    image_dir = os.path.join(img_dir, f"{imagename}.jpg")
+    if not os.path.exists(image_dir):
+        raise FileNotFoundError(f"Can't find the following file {image_dir}")
+    a = fig.add_subplot(subplot_row, subplot_col, index+1)
+    im = plt.imread(image_dir)
+    plt.axis('off')
+    plt.imshow(im)
+    a.set_title(title, fontsize=8)
+
+
+# Plot the target image first
+plot_image(query_image, f"{query_image} Target", 0)
+
+# Plot candidates to the image
+for idx, candidate in enumerate(candidates):
+    plot_image(candidate[0], f"{candidate[0]} {str(candidate[2])[:8]}", idx+1)
+
+fig.suptitle(f"{top_t} Most Similar Images | Number of images considered: {total_image_amount} | Features: {dataset[query_image].shape[0]}", fontsize=10)
+plt.show()
 
 
 # Correct Answer for testing
-print("--------------------------")
-calculate_distance = distanceFunction.createDistance("l2")
-candidates_with_distance = []
-for key, value in dataset.items():
-    if key == query_image:
-        continue
-    candidates_with_distance.append([key, calculate_distance(dataset[query_image], value)])
-
-candidates_with_distance.sort(key=lambda x: x[1])
-for idx, row in enumerate(candidates_with_distance):
-    print("{} {} {}".format(idx, row[0], row[1]))
-    if idx == 20:
-        break
+# print("--------------------------")
+# calculate_distance = distanceFunction.createDistance("l2")
+# candidates_with_distance = []
+# for key, value in dataset.items():
+#     if key == query_image:
+#         continue
+#     candidates_with_distance.append([key, calculate_distance(dataset[query_image], value)])
+#
+# candidates_with_distance.sort(key=lambda x: x[1])
+# for idx, row in enumerate(candidates_with_distance):
+#     print("{} {} {}".format(idx, row[0], row[1]))
+#     if idx == 20:
+#         break
