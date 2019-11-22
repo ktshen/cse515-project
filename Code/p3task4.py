@@ -1,10 +1,13 @@
 import argparse
 import numpy as np
+import os
+import cv2
 from module.database import FilesystemDatabase
 from module.DimRed import DimRed
 from models import modelFactory
 from module.handMetadataParser import getFileListByAspectOfHand
 from classifier.classifier import Classifier
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 4")
 parser.add_argument(
@@ -13,7 +16,7 @@ parser.add_argument(
     metavar="classifier",
     type=str,
     help="Classifier",
-    required=False,
+    required=True,
 )
 parser.add_argument(
     "-m",
@@ -58,7 +61,7 @@ parser.add_argument(
     required=False
 )
 parser.add_argument(
-    "-l",
+    "-limg",
     "--labeled_image_path",
     metavar="labeled_image_path",
     type=str,
@@ -66,12 +69,20 @@ parser.add_argument(
     required=False,
 )
 parser.add_argument(
-    "-u",
+    "-uimg",
     "--unlabeled_image_path",
     metavar="unlabeled_image_path",
     type=str,
     help="The folder path of unlabeled images.",
     required=False,
+)
+parser.add_argument(
+    "-rgb",
+    "--color_image",
+    help="Convert loaded image to grey or not.",
+    default=False,
+    action='store_true',
+    required=False
 )
 parser.add_argument(
     "-meta",
@@ -107,6 +118,7 @@ topk = args.topk
 
 labeledImgPath = args.labeled_image_path
 unlabeledImgPath = args.unlabeled_image_path
+useColorImage = args.color_image
 
 # Data
 trainingData = []
@@ -117,24 +129,45 @@ testingGT = []
 # Get all image id with its corresponding label
 dorsalFileIDList, palmarFileIDList, fileIDToLabelDict = getFileListByAspectOfHand(metadataPath)
 
-# Error checking.
+# Error checking. Parser.error will end this task here.
 if table is not None and modelName is None:
-    # This task will end here.
     parser.error("Please give -m as model name.")
 elif table is None and modelName is not None:
-    # This task will end here.
     parser.error("Please give -t as table name.")
+elif table is None and labeledImgPath is None:
+    parser.error("Regarding the input images, please give a table name by -t or give the image folder path by -limg")
 if unlabeledTable is not None and modelName is None:
-    # This task will end here.
     parser.error("Please give -m as model name.")
-
-
 if decompMethod and topk is None:
-    # This task will end here.
     parser.error("Please give -k as k for dimension reduction function.")
 
 
+# Used for load raw image.
+# This function will return document-term matrix and a label list.
+# If the filenameToLabel is None, this function will return label as empty list.
+def loadImagesAsDocTerm(imgPath, useColor, fileIDToLabel=None):
+    docTerm = []
+
+    imgPath = Path(imgPath)
+    label = []
+
+    for fileName in os.listdir(imgPath):
+        if fileIDToLabel is not None:
+            if fileName[:-4] not in fileIDToLabel:
+                continue
+            else:
+                label.append(fileIDToLabel[fileName[:-4]])
+
+        cv2Flag = cv2.IMREAD_COLOR if useColor else cv2.IMREAD_GRAYSCALE
+        img = cv2.imread(str(imgPath / fileName), cv2Flag)
+        img = img.flatten()
+        docTerm.append(img)
+
+    return docTerm, label
+
 # Load training data and ground truth
+print("Loading training image data...")
+
 if table is not None and modelName is not None:
     # Open database
     db = FilesystemDatabase(f"{table}_{modelName}", create=False)
@@ -146,10 +179,12 @@ if table is not None and modelName is not None:
 
     trainingData = np.array(trainingData)
 else:
-    pass   # Load image file directly
+    trainingData, trainingGT = loadImagesAsDocTerm(labeledImgPath, useColorImage, fileIDToLabelDict)
+    trainingData = np.array(trainingData)
 
 
 if decompMethod is not None and topk is not None:
+    print("Doing dimension reduction on training data...")
     # Create latent semantics
     latentModel = DimRed.createReduction(decompMethod, k=topk, data=trainingData)
     # Transform data
@@ -157,6 +192,7 @@ if decompMethod is not None and topk is not None:
 
 
 # Process testing data
+print("Loading test data...")
 
 # Load test meta data if exist. We can use this data to calculate prediction accuracy.
 testFileIDToLabelDict = None
@@ -181,16 +217,20 @@ if unlabeledTable is not None and modelName is not None:
 
     testingData = np.array(testingData)
 else:
-    pass   # Load image file directly
+    testingData, testingGT = loadImagesAsDocTerm(unlabeledImgPath, useColorImage, testFileIDToLabelDict)
+    testingData = np.array(testingData)
 
 
 if decompMethod is not None and topk is not None:
+    print("Doing dimension reduction on testing data...")
     testingData = latentModel.transform(testingData)
 
 # Training classifier
+print("Training Classifer by training data...")
 classifier.fit(trainingData, trainingGT)
 
 # Predict the testing data
+print("Predict testing data...")
 testingResult = classifier.predict(testingData)
 
 for i in range(len(testFileIDList)):

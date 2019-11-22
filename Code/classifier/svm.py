@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from . import classifier
 
 
@@ -34,7 +35,7 @@ class SVM(classifier.Classifier):
         # The following [0, 1, -2] is an example in Ch12 of Mining of Massive Datasets.
         # self._w = np.array([0, 1, -2], dtype=np.float)
 
-        for i in range(self._epoch):
+        for i in tqdm(range(self._epoch)):
             # This would get one dimension vector whose elements indicate the forward results.
             result = np.dot(self._w, features.T)
 
