@@ -9,6 +9,17 @@ from module.handMetadataParser import getFileListByAspectOfHand
 from classifier.classifier import Classifier
 from pathlib import Path
 
+
+'''
+Commandline for ppr
+ python p3task4.py -c svm -meta phase3_sample_data/labelled_set1.csv -limg phase3_sample_data/Labelled/Set1/ -uimg phase3_sample_data/Unlabelled/Set\ 1/ -tmeta phase3_sample_data/Unlabelled/unlabelled_set1.csv -m cm -t set1 -c ppr -ut set1
+
+ python p3task4.py -c svm -meta phase3_sample_data/labelled_set2.csv -limg phase3_sample_data/Labelled/Set2/ -uimg phase3_sample_data/Unlabelled/Set\ 2/ -tmeta phase3_sample_data/unlabelled_set2.csv -m cm -t set2 -c ppr -ut set2
+
+'''
+
+
+
 parser = argparse.ArgumentParser(description="Phase 3 Task 4")
 parser.add_argument(
     "-c",
@@ -104,7 +115,6 @@ args = parser.parse_args()
 
 # extract argument
 classiferName = args.classifier.lower()
-classifier = Classifier.createClassifier(classiferName)
 
 modelName = args.model.lower() if args.model else None
 table = args.table.lower() if args.table else None
@@ -225,13 +235,41 @@ if decompMethod is not None and topk is not None:
     print("Doing dimension reduction on testing data...")
     testingData = latentModel.transform(testingData)
 
+
+if classiferName=="ppr":
+
+    image_list = list(fileIDToLabelDict.keys())
+    image_simlarity_dict = {}
+
+    for i, feature in enumerate(trainingData):
+        img_img_sim = []
+        for feature_p in trainingData:
+            img_img_sim.append(np.dot(feature, feature_p.T))
+
+        a = np.array(img_img_sim)
+        ind = a.argsort()[-20:][::-1]
+
+        image_simlarity_dict[image_list[i]] = {
+            "sim_weight": a[ind],
+            "sim_node_index": ind
+        }
+    classifier = Classifier.createClassifier(classiferName,**{"img_sim_graph":image_simlarity_dict,"image_list":image_list})
+else:
+    classifier = Classifier.createClassifier(classiferName)
+
+
+
+
+
 # Training classifier
 print("Training Classifer by training data...")
 classifier.fit(trainingData, trainingGT)
 
+
 # Predict the testing data
 print("Predict testing data...")
 testingResult = classifier.predict(testingData)
+
 
 for i in range(len(testFileIDList)):
     print(f"{testFileIDList[i]}: {'dorsal' if testingResult[i] else 'palmar'}")
