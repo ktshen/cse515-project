@@ -7,7 +7,7 @@ class DecisionTree(Classifier):
         self._visualization = visualization
         
         self.max_depth = 3
-        self.min_size = 1
+        self.min_size = 40
         self.tree = None
         
         pass
@@ -18,6 +18,7 @@ class DecisionTree(Classifier):
         # gt = [y1, y2, y3, y4 ...] for each yi is true / false.
         data = np.c_[data,gt]
         self.tree  = self.build_tree(data)
+#        self.print_tree(self.tree)
         pass
 
     def predict(self, data):
@@ -116,3 +117,12 @@ class DecisionTree(Classifier):
                 return self.predicteach(tree['right'], data)
             else:
                 return tree['right']
+    
+#    def print_tree(node, depth=0):
+#       if isinstance(node, dict):
+#           print('%s[X%d < %.3f]' % ((depth*' ', (node['index']+1), node['value'])))
+#           print_tree(node['left'], depth+1)
+#           print_tree(node['right'], depth+1)
+#       else:
+#           print('%s[%s]' % ((depth, node)))
+    
