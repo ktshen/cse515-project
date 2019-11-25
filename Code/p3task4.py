@@ -10,14 +10,13 @@ from classifier.classifier import Classifier
 from pathlib import Path
 
 
-'''
+"""
 Commandline for ppr
  python p3task4.py -c svm -meta phase3_sample_data/labelled_set1.csv -limg phase3_sample_data/Labelled/Set1/ -uimg phase3_sample_data/Unlabelled/Set\ 1/ -tmeta phase3_sample_data/Unlabelled/unlabelled_set1.csv -m cm -t set1 -c ppr -ut set1
 
  python p3task4.py -c svm -meta phase3_sample_data/labelled_set2.csv -limg phase3_sample_data/Labelled/Set2/ -uimg phase3_sample_data/Unlabelled/Set\ 2/ -tmeta phase3_sample_data/unlabelled_set2.csv -m cm -t set2 -c ppr -ut set2
 
-'''
-
+"""
 
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 4")
@@ -69,7 +68,7 @@ parser.add_argument(
     type=str,
     help="Distance function.",
     default="l2",
-    required=False
+    required=False,
 )
 parser.add_argument(
     "-limg",
@@ -92,8 +91,8 @@ parser.add_argument(
     "--color_image",
     help="Convert loaded image to grey or not.",
     default=False,
-    action='store_true',
-    required=False
+    action="store_true",
+    required=False,
 )
 parser.add_argument(
     "-meta",
@@ -101,7 +100,7 @@ parser.add_argument(
     metavar="METADATA_PATH",
     type=str,
     help="Path of metadata.",
-    required=True
+    required=True,
 )
 parser.add_argument(
     "-tmeta",
@@ -109,12 +108,12 @@ parser.add_argument(
     metavar="TEST_METADATA",
     type=str,
     help="The metadata path of unlabeled / test folder.",
-    required=False
+    required=False,
 )
 args = parser.parse_args()
 
 # extract argument
-classiferName = args.classifier.lower()
+classifierName = args.classifier.lower()
 
 modelName = args.model.lower() if args.model else None
 table = args.table.lower() if args.table else None
@@ -137,7 +136,9 @@ testingData = []
 testingGT = []
 
 # Get all image id with its corresponding label
-dorsalFileIDList, palmarFileIDList, fileIDToLabelDict = getFileListByAspectOfHand(metadataPath)
+dorsalFileIDList, palmarFileIDList, fileIDToLabelDict = getFileListByAspectOfHand(
+    metadataPath
+)
 
 # Error checking. Parser.error will end this task here.
 if table is not None and modelName is None:
@@ -145,7 +146,9 @@ if table is not None and modelName is None:
 elif table is None and modelName is not None:
     parser.error("Please give -t as table name.")
 elif table is None and labeledImgPath is None:
-    parser.error("Regarding the input images, please give a table name by -t or give the image folder path by -limg")
+    parser.error(
+        "Regarding the input images, please give a table name by -t or give the image folder path by -limg"
+    )
 if unlabeledTable is not None and modelName is None:
     parser.error("Please give -m as model name.")
 if decompMethod and topk is None:
@@ -175,6 +178,7 @@ def loadImagesAsDocTerm(imgPath, useColor, fileIDToLabel=None):
 
     return docTerm, label
 
+
 # Load training data and ground truth
 print("Loading training image data...")
 
@@ -184,12 +188,18 @@ if table is not None and modelName is not None:
     model = modelFactory.creatModel(modelName)
 
     for fileID, isDorsal in fileIDToLabelDict.items():
-        trainingData.append(model.flattenFecture(model.deserializeFeature(db.getData(fileID)), decompMethod))
+        trainingData.append(
+            model.flattenFecture(
+                model.deserializeFeature(db.getData(fileID)), decompMethod
+            )
+        )
         trainingGT.append(isDorsal)
 
     trainingData = np.array(trainingData)
 else:
-    trainingData, trainingGT = loadImagesAsDocTerm(labeledImgPath, useColorImage, fileIDToLabelDict)
+    trainingData, trainingGT = loadImagesAsDocTerm(
+        labeledImgPath, useColorImage, fileIDToLabelDict
+    )
     trainingData = np.array(trainingData)
 
 
@@ -219,15 +229,25 @@ if unlabeledTable is not None and modelName is not None:
         if testFileIDToLabelDict is not None:
             if fileID in testFileIDToLabelDict:
                 testFileIDList.append(fileID)
-                testingData.append(model.flattenFecture(model.deserializeFeature(db.getData(fileID)), decompMethod))
+                testingData.append(
+                    model.flattenFecture(
+                        model.deserializeFeature(db.getData(fileID)), decompMethod
+                    )
+                )
                 testingGT.append(testFileIDToLabelDict[fileID])
         else:
             testFileIDList.append(fileID)
-            testingData.append(model.flattenFecture(model.deserializeFeature(db.getData(fileID)), decompMethod))
+            testingData.append(
+                model.flattenFecture(
+                    model.deserializeFeature(db.getData(fileID)), decompMethod
+                )
+            )
 
     testingData = np.array(testingData)
 else:
-    testingData, testingGT = loadImagesAsDocTerm(unlabeledImgPath, useColorImage, testFileIDToLabelDict)
+    testingData, testingGT = loadImagesAsDocTerm(
+        unlabeledImgPath, useColorImage, testFileIDToLabelDict
+    )
     testingData = np.array(testingData)
 
 
@@ -236,7 +256,7 @@ if decompMethod is not None and topk is not None:
     testingData = latentModel.transform(testingData)
 
 
-if classiferName=="ppr":
+if classifierName == "ppr":
 
     image_list = list(fileIDToLabelDict.keys())
     image_simlarity_dict = {}
@@ -251,14 +271,14 @@ if classiferName=="ppr":
 
         image_simlarity_dict[image_list[i]] = {
             "sim_weight": a[ind],
-            "sim_node_index": ind
+            "sim_node_index": ind,
         }
-    classifier = Classifier.createClassifier(classiferName,**{"img_sim_graph":image_simlarity_dict,"image_list":image_list})
+    classifier = Classifier.createClassifier(
+        classifierName,
+        **{"img_sim_graph": image_simlarity_dict, "image_list": image_list},
+    )
 else:
-    classifier = Classifier.createClassifier(classiferName)
-
-
-
+    classifier = Classifier.createClassifier(classifierName)
 
 
 # Training classifier
