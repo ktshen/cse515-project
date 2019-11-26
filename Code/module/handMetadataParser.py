@@ -25,6 +25,9 @@ def getFileListByAspectOfHand(metadataPath):
         next(csvReader, None)  # skip the headers
 
         for row in csvReader:
+            if len(row[7]) == 0:
+                continue
+
             dorsal = row[7].strip().split(' ')[0] == "dorsal"
 
             fileID = row[8][:-4]
@@ -36,7 +39,10 @@ def getFileListByAspectOfHand(metadataPath):
                 palmarFileIDList.append(fileID)
                 fileIDToLabelDict[fileID] = False
 
-    return dorsalFileIDList, palmarFileIDList, fileIDToLabelDict
+    if len(fileIDToLabelDict) > 0:
+        return dorsalFileIDList, palmarFileIDList, fileIDToLabelDict
+    else:
+        return None, None, None
 
 
 def getFilelistByLabel(metadataPath, label):
