@@ -2,14 +2,15 @@ import argparse
 import os
 import numpy as np
 from pathlib import Path
+from module.handMetadataParser import getFilelistByLabel
 from module.handMetadataParser import getFilelistByLabelP3
 from module.DimRed import DimRed
 from models import modelFactory
 from module.database import FilesystemDatabase
-from sklearn.metrics.pairwise import cosine_similarity
+from module.kmeans import KMeans
 
+# Processing arguments
 parser = argparse.ArgumentParser(description="Phase 3 Task 2")
-
 parser.add_argument(
     "-p",
     "--labeled_image_path",
@@ -50,17 +51,36 @@ parser.add_argument(
     help="Path of metadata.",
     required=True
 )
+parser.add_argument(
+    "-test",
+    "--test",
+    metavar="test",
+    type=bool,
+    help="test mode.",
+    required=False,
+    default=False
+)
+parser.add_argument(
+    "-k",
+    "--k",
+    metavar="k",
+    type=int,
+    help="the number of latent semantics.",
+    required=False,
+    default=10
+)
 
 args = parser.parse_args()
 labeledPath = Path(args.labeled_image_path)
 unlabeledPath = Path(args.unlabeled_image_path)
 c = args.c_cluster
 metadataPath = args.metadata
-
 table = args.table.lower()
+istest = args.test
+
+# Get labeled and unlabeled images' IDs
 labeledFiles = []
 unlabeledFiles = []
-
 for fileName in os.listdir(labeledPath):
     if fileName.endswith(".jpg"):
         labeledFiles.append(fileName[:-4])
@@ -69,8 +89,12 @@ for fileName in os.listdir(unlabeledPath):
         unlabeledFiles.append(fileName[:-4])
 print(f"{len(labeledFiles)} labeled images and {len(unlabeledFiles)} unlabeled images.")
 
-# get labels
-palmarset = frozenset(getFilelistByLabelP3(metadataPath, 'p'))
+# Separate palmar and dorsal images
+if istest:
+    palmarset = frozenset(getFilelistByLabel(metadataPath, 'p'))
+else:
+    palmarset = frozenset(getFilelistByLabelP3(metadataPath, 'p'))
+    
 palmarImage = []
 dorsalImage = []
 for img in labeledFiles:
@@ -79,98 +103,97 @@ for img in labeledFiles:
     else:
         dorsalImage.append(img)
 
-
 """
-
+In this method, we do clustering in PCA latent semantics. The length is measured by L1-norm.
 """
-
 # compute clusters and find representatives
-decompMethod = 'svd'
-usedModels = ["cavg", "hog"] 
-  
+k = args.k
+decompMethod = 'pca'
+usedModels = ["cavg"] 
+
+# Read color average descriptors     
 db = FilesystemDatabase(f"{table}_cavg", create=False)
 model = modelFactory.creatModel("cavg")
-
+   
 palmar_cm = []
 for imgId in palmarImage:
     palmar_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
+# Compute palmar latent semantics
+palmar_cm_latent = DimRed.createReduction(decompMethod, k=k, data=palmar_cm)
+palmar_cm = palmar_cm_latent.transform(palmar_cm)
 
+# Compute palmar clustering
+palmar_cm_cluster = KMeans(n_clusters=c).fit(np.array(palmar_cm))
+palmar_cm_centroid = palmar_cm_cluster.cluster_centers_ 
+palmar_clusters = [[] for i in range(c) ]
+for i, l in enumerate(palmar_cm_cluster.labels_):
+    palmar_clusters[l].append(palmarImage[i])
+   
 dorsal_cm = []
 for imgId in dorsalImage:
     dorsal_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
+    
+# Compute palmar latent semantics
+dorsal_cm_latent = DimRed.createReduction(decompMethod, k=k, data=dorsal_cm)
+dorsal_cm = dorsal_cm_latent.transform(dorsal_cm)
 
+# Compute palmar clustering
+dorsal_cm_cluster = KMeans(n_clusters=c).fit(np.array(dorsal_cm))
+dorsal_cm_centroid = dorsal_cm_cluster.cluster_centers_ 
+dorsal_clusters = [[] for i in range(c) ]
+for i, l in enumerate(dorsal_cm_cluster.labels_):
+    dorsal_clusters[l].append(dorsalImage[i])
+ 
+# Projection   
 unlabeled_cm = []
 for imgId in unlabeledFiles:
     unlabeled_cm.append(
         model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
     )
+unlabeled_palmar_cm = palmar_cm_latent.transform(unlabeled_cm)
+unlabeled_dorsal_cm = dorsal_cm_latent.transform(unlabeled_cm)                
   
-db = FilesystemDatabase(f"{table}_hog", create=False)
-model = modelFactory.creatModel("hog")
-
-palmar_hog = []
-for imgId in palmarImage:
-    palmar_hog.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-
-dorsal_hog = []
-for imgId in dorsalImage:
-    dorsal_hog.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-
-unlabeled_hog = []
-for imgId in unlabeledFiles:
-    unlabeled_hog.append(
-        model.flattenFecture(model.deserializeFeature(db.getData(imgId)), decompMethod)
-    )
-    
-  
-
-overallRate = 0     #overall correct prediction
-CMRate = 0          #correct prediction using CM
-HOGRate = 0         #correct prediction using HOG
-noComp = 0          #all models predict wrongly
-  
-totalNum = len(unlabeledFiles)
-pNorm = 2
-CMfactor = 50
-HOGfactor = 1
-  
-for index, imgId in enumerate(unlabeledFiles):
-#     isPalmar = imgId in palmarset
-    biasToP = 0
-      
+pNorm = 1
+if istest:
+    overallAccuracy = 0     #overall correct prediction
+    totalNum = len(unlabeledFiles)   
+else:
+    palmar = []
+    dorsal = []
+    print("The dorsal clusters are:")
+    for images in dorsal_clusters:
+        print(images)
+    print("The palmar clusters are:")
+    for images in palmar_clusters:
+        print(images)  
+             
+for index, imgId in enumerate(unlabeledFiles):         
     cmPlen = 0
     cmDlen = 0
-    CMdiff = 0
-#     if isPalmar == (CMdiff > 0):
-#         CMRate += 1     
-  
-    hogPlen = 0
-    hogDlen = 0
-    HOGdiff = 0
-#     if isPalmar == (HOGdiff > 0):
-#         HOGRate += 1
-  
-    biastoP = 0
-#     if isPalmar == (biastoP > 0):
-#         overallRate += 1
-#     else:
-#         if (CMdiff > 0 and HOGdiff > 0) or (CMdiff < 0 and HOGdiff < 0):
-#             noComp += 1
-#         else:
-#             print(f"the CMdiff is {CMfactor * CMdiff}; the HOG is {HOGfactor * HOGdiff}")
-          
-# print(f"Overall hit rate is {overallRate/totalNum}")
-# print(f"CM rate is {CMRate/totalNum}; HOG rate is {HOGRate/totalNum}")
-# print(f"no compensate misses {noComp/(totalNum - overallRate)}")
-    if biastoP > 0:
-        print(f"{imgId} is Palmar")
+    for idx, centroid in enumerate(palmar_cm_centroid):
+        cmPlen += len(palmar_clusters[idx]) * np.linalg.norm(centroid - unlabeled_palmar_cm[index], ord = pNorm)
+   
+    for idx, centroid in enumerate(dorsal_cm_centroid):
+        cmDlen += len(dorsal_clusters[idx]) * np.linalg.norm(centroid - unlabeled_dorsal_cm[index], ord = pNorm)    
+        
+    if istest:  
+        isPalmar = imgId in palmarset
+        if isPalmar == (cmPlen < cmDlen):
+            overallAccuracy += 1  
     else:
-        print(f"{imgId} is Dorsal")
+        if cmPlen < cmDlen:
+            palmar.append(imgId)
+        else:
+            dorsal.append(imgId)  
+          
+if istest:          
+    print(f"Overall accuracy is {overallAccuracy/totalNum}")
+else:
+    print("Images labeled as palmar are:")
+    print(palmar)
+    print("Images labeled as dorsal are:")
+    print(dorsal)
