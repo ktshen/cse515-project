@@ -67,11 +67,16 @@ db = FilesystemDatabase(f"{table}_{modelName}", create=False)
 model = modelFactory.creatModel(modelName)
 
 imageDataDict = {}
+allImageData = []
 
 for cand in candidates:
-    imageDataDict[cand[0]] = model.flattenFecture(
+    feature = model.flattenFecture(
         model.deserializeFeature(db.getData(cand[0])), decompMethod
     )
+    imageDataDict[cand[0]] = feature
+    allImageData.append(feature)
+
+allImageData = np.array(allImageData)
 
 # Label images
 print("Label the images as r(relevant), i(irrelevant) or ?(unknown)")
@@ -94,15 +99,44 @@ for cand in candidates:
         elif label == "?":
             break
 
+if len(retrainData) == 0:
+    print("Please give some relevant and irrelevant label")
+
+print("Doing dimension reduction on training data...")
 if decompMethod is not None and topk is not None:
-    print("Doing dimension reduction on training data...")
     # Create latent semantics
     latentModel = DimRed.createReduction(decompMethod, k=topk, data=retrainData)
     # Transform data
     retrainData = latentModel.transform(retrainData)
 
 # Training classifier
-print("Training Classifer by training data...")
+print("Training classifier by training data...")
 retrainData = np.array(retrainData)
 classifier.fit(retrainData, retrainLabel)
 
+
+print("Doing dimension reduction on all images data...")
+if decompMethod is not None and topk is not None:
+    # Transform data
+    allImageData = latentModel.transform(allImageData)
+
+
+print("Predict all Image data by classifier")
+allImagePredictResult = classifier.predict(allImageData)
+
+relevantImages = []
+irrelevantImages = []
+
+for i in range(len(allImagePredictResult)):
+    if allImagePredictResult[i]:
+        relevantImages.append(candidates[i][0])
+    else:
+        irrelevantImages.append(candidates[i][0])
+
+print("Relevant image:")
+for r in relevantImages:
+    print(r)
+
+print("Irrelevant images:")
+for r in irrelevantImages:
+    print(r)

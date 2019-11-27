@@ -36,6 +36,13 @@ Option:
 
 #### Task 4 example:
 
+Some arguments for task4:
+-ut The unlabeled table.
+
+-limg Labled raw image path if you do not want to use feature extraction.
+
+-uimg Unlabeled raw image path if you do not want to use feature extraction.
+
 - Load image features and labels for labeled data / unlabeled data.
 - Use PCA as dimension reduction with k = 20.
 
@@ -48,6 +55,16 @@ Load raw image file and labels for labeld data / unlabeled data.
 
 ```Shell
  python p3task4.py -c svm -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv -limg ~/hw/cse515_data/phase3_sample_data/Labelled/Set1 -uimg ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1/ -tmeta ~/hw/cse515_data/phase3_sample_data/Unlabelled/unlablled_set1.csv -d svd -k 100
+```
+
+#### Task 6 example:
+
+**Please run p3task5.py first before p3task6.py.**
+
+In task6, the there are prompts as user to input r(relevant), i(irrelevant), or ?(do not know).
+
+```Shell
+python p3task6.py -c svm -m cavg -d pca -k 20 -t 11k
 ```
 
 
