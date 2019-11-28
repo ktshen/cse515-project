@@ -24,7 +24,7 @@ parser.add_argument(
     "--model",
     metavar="model",
     type=str,
-    help="The model will be used.",
+    help="The model of image feature will be used.",
     required=True,
 )
 parser.add_argument(
