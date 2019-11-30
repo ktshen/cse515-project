@@ -111,7 +111,28 @@ parser.add_argument(
     help="The metadata path of unlabeled / test folder.",
     required=False
 )
+
+
+
+parser.add_argument(
+    "-sk",
+    type=int,
+    required=True
+)
+
+parser.add_argument(
+    "-lk",
+    type = int,
+    required=True
+)
+
+
+
+
 args = parser.parse_args()
+
+sk = args.sk
+lk = args.lk
 
 # extract argument
 classiferName = args.classifier.lower()
@@ -247,13 +268,13 @@ if classiferName=="ppr":
             img_img_sim.append(np.dot(feature, feature_p.T))
 
         a = np.array(img_img_sim)
-        ind = a.argsort()[-20:][::-1]
+        ind = a.argsort()[-sk:][::-1]
 
         image_simlarity_dict[image_list[i]] = {
             "sim_weight": a[ind],
             "sim_node_index": ind
         }
-    classifier = Classifier.createClassifier(classiferName,**{"img_sim_graph":image_simlarity_dict,"image_list":image_list})
+    classifier = Classifier.createClassifier(classiferName,**{"img_sim_graph":image_simlarity_dict,"image_list":image_list,"lk":lk})
 else:
     classifier = Classifier.createClassifier(classiferName)
 
@@ -268,11 +289,11 @@ classifier.fit(trainingData, trainingGT)
 
 # Predict the testing data
 print("Predict testing data...")
-testingResult = classifier.predict(testingData)
+testingResult = classifier.predict(testingData,sk)
 
 
-for i in range(len(testFileIDList)):
-    print(f"{testFileIDList[i]}: {'dorsal' if testingResult[i] else 'palmar'}")
+'''for i in range(len(testFileIDList)):
+    print(f"{testFileIDList[i]}: {'dorsal' if testingResult[i] else 'palmar'}")'''
 
 # Calculate accuracy if we have testing labels
 correctNum = 0
