@@ -17,6 +17,8 @@ Arguments:
 
 -meta PATH: The path of metadata for labeled images.
 
+-test(optional) Test mode: The program will print the accuracy, the meta has to be the complete one.
+
 
 ### Task 2:
 
@@ -34,7 +36,9 @@ Arguments:
 
 -meta PATH: The path of metadata for labeled images.
 
+-test(optional) Test mode: The program will print the accuracy, the meta has to be the complete one.
 
+-k(optional) # of latent semantics: The default value is 10. It is usually set in test mode to show the effect of k.
 ### Task 3:
 
 Arguments:

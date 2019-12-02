@@ -22,8 +22,6 @@ class ColorAvg(Model):
 
         # The results we wanted.
         resultMean = np.zeros(shape=(numOfRows, numOfColumns, c))
-#         resultStd = np.zeros(shape=(numOfRows, numOfColumns, c))
-#         resultSkew = np.zeros(shape=(numOfRows, numOfColumns, c))
 
         for hIdx in range(numOfRows):
             # Find the end index of row window.
@@ -46,30 +44,6 @@ class ColorAvg(Model):
                 ]
 
                 resultMean[hIdx, wIdx, :] = np.mean(window, axis=(0, 1))
-#                 resultStd[hIdx, wIdx, :] = np.std(window, axis=(0, 1))
-#                 # I tried scipy.stats.skew, but it seems the result is not correct.
-#                 # Implement it by myself.
-#                 resultSkew[hIdx, wIdx, 0] = np.sum(
-#                     np.power(window[:, :, 0] - resultMean[hIdx, wIdx, 0], 3)
-#                 ) / (self._heightOfWindow * self._widthOfWindow)
-#                 resultSkew[hIdx, wIdx, 1] = np.sum(
-#                     np.power(window[:, :, 1] - resultMean[hIdx, wIdx, 1], 3)
-#                 ) / (self._heightOfWindow * self._widthOfWindow)
-#                 resultSkew[hIdx, wIdx, 2] = np.sum(
-#                     np.power(window[:, :, 2] - resultMean[hIdx, wIdx, 2], 3)
-#                 ) / (self._heightOfWindow * self._widthOfWindow)
-# 
-#                 resultSkew[hIdx, wIdx, 0] = np.sign(resultSkew[hIdx, wIdx, 0]) * (
-#                     np.abs(resultSkew[hIdx, wIdx, 0])
-#                 ) ** (1 / 3)
-#                 resultSkew[hIdx, wIdx, 1] = np.sign(resultSkew[hIdx, wIdx, 1]) * (
-#                     np.abs(resultSkew[hIdx, wIdx, 1])
-#                 ) ** (1 / 3)
-#                 resultSkew[hIdx, wIdx, 2] = np.sign(resultSkew[hIdx, wIdx, 2]) * (
-#                     np.abs(resultSkew[hIdx, wIdx, 2])
-#                 ) ** (1 / 3)
-
-#         return (resultMean, resultStd, resultSkew)
         return resultMean
 
 
