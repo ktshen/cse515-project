@@ -49,7 +49,6 @@ parser.add_argument("-k", "--topk", metavar="topk", type=int, help="K.", require
 # extract argument
 args = parser.parse_args()
 
-classifier = Classifier.createClassifier(args.classifier.lower())
 modelName = args.model.lower() if args.model else None
 table = args.table.lower() if args.table else None
 
@@ -85,19 +84,31 @@ retrainData = []
 retrainLabel = []
 retrainFileID = []
 
+rFileIDList = []
+irFileIDList = []
+allFileIDList = []
+rIrFileIDList = []
+
 for cand in candidates:
     while True:
         label = input(f"{cand[0]} > ").strip()
+        allFileIDList.append(cand[0])
+
         if label == "r":
             retrainData.append(imageDataDict[cand[0]])
             retrainLabel.append(True)
+            rFileIDList.append(cand[0])
+            rIrFileIDList.append(cand[0])
             break
         elif label == "i":
             retrainData.append(imageDataDict[cand[0]])
             retrainLabel.append(False)
+            irFileIDList.append(cand[0])
+            rIrFileIDList.append(cand[0])
             break
         elif label == "?":
             break
+
 
 if len(retrainData) == 0:
     print("Please give some relevant and irrelevant label")
@@ -112,6 +123,31 @@ if decompMethod is not None and topk is not None:
 # Training classifier
 print("Training classifier by training data...")
 retrainData = np.array(retrainData)
+
+
+if args.classifier.lower() == "ppr":
+    image_list = rIrFileIDList
+    image_simlarity_dict = {}
+
+    for i, feature in enumerate(retrainData):
+        img_img_sim = []
+        for feature_p in retrainData:
+            img_img_sim.append(np.dot(feature, feature_p.T))
+
+        a = np.array(img_img_sim)
+        ind = a.argsort()[-20:][::-1]
+
+        image_simlarity_dict[image_list[i]] = {
+            "sim_weight": a[ind],
+            "sim_node_index": ind,
+        }
+    classifier = Classifier.createClassifier(
+        args.classifier.lower(),
+        **{"img_sim_graph": image_simlarity_dict, "image_list": image_list},
+    )
+else:
+    classifier = Classifier.createClassifier(args.classifier.lower())
+
 classifier.fit(retrainData, retrainLabel)
 
 
