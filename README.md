@@ -129,6 +129,8 @@ python p3task4.py -c svm -m hog -t set1 -d pca -k 20 -ut tSet1 -meta ~/hw/cse515
 
 -dir PATH: The path of images.
 
+--visualize\_vector(*optional*): Visualize the feature vectors.
+
 
 ### Task 6:
 
