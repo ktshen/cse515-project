@@ -6,6 +6,7 @@ from module.database import FilesystemDatabase
 from models import modelFactory
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
+import pickle
 # from module.distanceFunction import distanceFunction
 
 # np.set_printoptions(threshold=np.inf)
@@ -108,6 +109,9 @@ lsh.build_structure(dataset)
 # Get result
 candidates = lsh.get_t_most_similar_images(query_image, top_t)
 
+# Save the result to "task5_output.pkl"
+with open("task5_output.pkl", "wb") as fHndl:
+    pickle.dump((query_image, candidates), fHndl)
 
 # Check image directory exists
 if not os.path.isdir(img_dir):

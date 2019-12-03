@@ -7,9 +7,10 @@ from models import modelFactory
 from module.database import FilesystemDatabase
 from classifier.classifier import Classifier
 
+#python p3task3.py -k 5 -lk 10 -t set2 -i phase3_sample_data/sample/ -lst Hand_0008333.jpg,Hand_0006183.jpg,Hand_0000074.jpg
 
-#python p3task3.py -k 5 -lk 10 -t test -i phase3_sample_data/sample/ -lst Hand_0003457.jpg,Hand_0000074.jpg,Hand_0005661.jpg
-#python p3task3.py -k 5 -lk 10 -t test -i phase3_sample_data/sample/ -lst Hand_0008333.jpg,Hand_0006183.jpg,Hand_0000074.jpg
+
+#python p3task3.py -k 5 -lk 10 -t set2 -i phase3_sample_data/sample/ -lst Hand_0003457.jpg,Hand_0000074.jpg,Hand_0005661.jpg
 
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 3")
