@@ -7,7 +7,7 @@ from module.DimRed import DimRed
 from pathlib import Path
 from module.database import FilesystemDatabase
 from models import modelFactory
-
+from PRF import prf
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 6")
 
@@ -109,6 +109,10 @@ for cand in candidates:
         elif label == "?":
             break
 
+if args.classifier.lower() == "prf":
+    print("The reordered results are:")
+    print(prf(rFileIDList, irFileIDList, allFileIDList, table))
+    return
 
 if len(retrainData) == 0:
     print("Please give some relevant and irrelevant label")
