@@ -1,13 +1,13 @@
 import argparse
 import numpy as np
-import os
 import pickle
 from classifier.classifier import Classifier
 from module.DimRed import DimRed
-from pathlib import Path
 from module.database import FilesystemDatabase
 from models import modelFactory
-from PRF import prf
+from module.PRF import prf
+import sys
+
 
 parser = argparse.ArgumentParser(description="Phase 3 Task 6")
 
@@ -112,7 +112,9 @@ for cand in candidates:
 if args.classifier.lower() == "prf":
     print("The reordered results are:")
     print(prf(rFileIDList, irFileIDList, allFileIDList, table))
-    return
+
+    # PRF do not need to run the following code.
+    sys.exit(0)
 
 if len(retrainData) == 0:
     print("Please give some relevant and irrelevant label")
