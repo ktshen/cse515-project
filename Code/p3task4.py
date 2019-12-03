@@ -110,6 +110,20 @@ parser.add_argument(
     help="The metadata path of unlabeled / test folder.",
     required=False,
 )
+parser.add_argument(
+    "--svm_pretrained",
+    metavar="SVM_PRETRAINED",
+    type=str,
+    help="The pretrained path for SVM",
+    required=False
+)
+parser.add_argument(
+    "--svm_save_weight",
+    help="Save SVM weight.",
+    default=False,
+    action="store_true",
+    required=False,
+)
 args = parser.parse_args()
 
 # extract argument
@@ -257,7 +271,6 @@ if decompMethod is not None and topk is not None:
 
 
 if classifierName == "ppr":
-
     image_list = list(fileIDToLabelDict.keys())
     image_simlarity_dict = {}
 
@@ -276,6 +289,11 @@ if classifierName == "ppr":
     classifier = Classifier.createClassifier(
         classifierName,
         **{"img_sim_graph": image_simlarity_dict, "image_list": image_list},
+    )
+elif classifierName == "svm" and args.svm_pretrained is not None:
+    classifier = Classifier.createClassifier(
+        classifierName,
+        **{"pretrained": args.svm_pretrained}
     )
 else:
     classifier = Classifier.createClassifier(classifierName)
@@ -303,3 +321,7 @@ if len(testingGT) > 0:
             correctNum += 1
 
     print(f"Accuracy: {(correctNum / len(testingResult)) * 100}%")
+
+    if classifierName == "svm" and args.svm_save_weight:
+        classifier.save(f"{modelName}_{decompMethod}{topk}_{table}_{unlabeledTable}_{(correctNum / len(testingResult)) * 100}")
+

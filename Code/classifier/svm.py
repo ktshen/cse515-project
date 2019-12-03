@@ -1,24 +1,35 @@
 import numpy as np
 from tqdm import tqdm
 from . import classifier
+import pickle
 
 
 class SVM(classifier.Classifier):
-    def __init__(self, dimension=None, visualization=False):
+    def __init__(self, dimension=None, visualization=False, pretrained=None, canFineTune=False):
         self._visualization = visualization
         self._color = {1: "r", -1: "b"}
 
         self._eta = 0.2
         self._regularization = 0.1
-        self._epoch = 100000
+        self._epoch = 100
+        self._canFineTune = True
 
-        if dimension is not None:
+        if pretrained is not None:
+            with open(pretrained, "rb") as fhndl:
+                self._w = pickle.load(fhndl)
+
+            # only consider when we have pretrained weight.
+            self._canFineTune = canFineTune
+        elif dimension is not None:
             # 1 is B
-            self._w = np.random.random([dimension + 1])
+            self._w = np.random.random([dimension + 1]) * 2 - 1.0
         else:
             self._w = None
 
     def fit(self, data, gt):
+        if not self._canFineTune:
+            return
+
         # The data format should be:
         # data = [[features of data1], [features of data2], ... [features of dataN]]
         # gt = [y1, y2, y3, y4 ...] for each yi is true / false.
@@ -30,6 +41,7 @@ class SVM(classifier.Classifier):
         # Convert [true, false, ...] to [1.0, -1.0, ...]
         gt = np.array(gt) * 2 - 1.0
 
+        # Initialize the weight to [-1.0, 1.0]
         self._w = 2.0 * np.random.random(features.shape[1]) - 1.0
 
         # The following [0, 1, -2] is an example in Ch12 of Mining of Massive Datasets.
@@ -54,6 +66,11 @@ class SVM(classifier.Classifier):
             raise Exception("Please train SVM model first")
 
         return np.dot(self._w, data.T) > 0
+
+    def save(self, filename):
+        import pickle
+        with open(f"svm/svm_{filename}.pkl", "wb") as fhndl:
+            pickle.dump(self._w, fhndl)
 
 
 if __name__ == "__main__":

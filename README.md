@@ -93,6 +93,10 @@ Some arguments for task4:
 
 -uimg PATH(*optional*): Unlabeled raw image path if you do not want to use feature extraction.
 
+--svm\_pretrained(*optional*): SVM will save its weight to svm/ folder.
+
+--svm\_pretrained PATH(*optional*): SVM will load the weight and will NOT adjust its weight later.
+
 #### Example:
 - Load image features and labels for labeled data / unlabeled data.
 - Use PCA as dimension reduction with k = 20.
