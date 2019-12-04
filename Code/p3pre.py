@@ -6,7 +6,7 @@ from module.database import FilesystemDatabase
 import cv2 as cv
 
 
-parser = argparse.ArgumentParser(description="Phase 3 Pre-process")
+parser = argparse.ArgumentParser(description="Phase 3 Pre-compututation for task 1 and 2")
 
 parser.add_argument(
     "-p",
@@ -39,8 +39,7 @@ labeledPath = Path(args.labeled_image_path)
 unlabeledPath = Path(args.unlabeled_image_path)
 table = args.table.lower()
 
-usedModels = ["cm", "lbp", "hog","sift"] #task 1 uses these three models
-#usedModels = ["cavg"] #task 1 uses these three models
+usedModels = ["cavg", "hog"] #task 1 uses these three models
 
 allFile = []
 
