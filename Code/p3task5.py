@@ -69,6 +69,13 @@ parser.add_argument(
     required=True,
 )
 
+parser.add_argument(
+    "--visualize_vector",
+    help="Visualize Feature Vectors.",
+    default=False,
+    action="store_true",
+    required=False,
+)
 # extract argument
 args = parser.parse_args()
 
@@ -79,6 +86,7 @@ top_t = args.top_t
 modelName = args.model.lower()
 table = args.table.lower()
 img_dir = args.imgdir
+visualize_vector = args.visualize_vector
 
 # Load database and create dataset
 print("Loading files to dataset...")
@@ -107,7 +115,7 @@ lsh = LSH(L_layers, k_hashes)
 lsh.build_structure(dataset)
 
 # Get result
-candidates = lsh.get_t_most_similar_images(query_image, top_t)
+candidates = lsh.get_t_most_similar_images(query_image, top_t, visualize_vector)
 
 # Save the result to "task5_output.pkl"
 with open("task5_output.pkl", "wb") as fHndl:

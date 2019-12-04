@@ -45,7 +45,7 @@ class LSH:
                 new_hash_table[vector] = self.images[index]
             self.hash_tables.append(new_hash_table)
 
-    def get_t_most_similar_images(self, query_image, t):
+    def get_t_most_similar_images(self, query_image, t, visualize_vector):
         """
             To search for k similar images, we first query each hash table with the target image and get
             all the candidates in each matching bucket. However, if the amount of candidates do not satisfy
@@ -60,6 +60,9 @@ class LSH:
                 - query_image: the target image
                 - t: t nearest neighbors
         """
+        if visualize_vector:
+            np.set_printoptions(threshold=np.inf)
+
         print(f"Getting {t} most similar images of {query_image} from dataset...")
         match_length = self.k_hashes_per_layer
         query_vector = self.dataset[query_image]
@@ -80,8 +83,15 @@ class LSH:
             print(f"Total images considered: {len(self.images)}")
             candidates_with_distance = candidates_with_distance[:t]
 
+        if visualize_vector:
+            print("Query Image Vector:")
+            print(query_vector)
+
         for index, row in enumerate(candidates_with_distance):
             print("No.{0}  Image ID: {1}  Distance: {2}".format(index+1, row[0], row[2]))
+
+            if visualize_vector:
+                print(row[1])
 
         return candidates_with_distance
 

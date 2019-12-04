@@ -8,6 +8,7 @@ class PPR(Classifier):
         self.alpha = alpha
         self.lk = lk
 
+
         self.image_list = image_list
 
         for key,item in img_sim_graph.items():
@@ -34,14 +35,11 @@ class PPR(Classifier):
         self.train_data = data
         self.gt = gt
 
-    def predict(self, data,k):
-
+    def predict(self, data,k=20):
         result_list = []
-
         for each_test_data in data:
             self.transition[-1,:] = 0
             self.transition[:,-1] = 0
-
             img_img_sim = []
             for tran_dd  in self.train_data:
                 img_img_sim.append(np.dot(each_test_data, tran_dd.T))
@@ -49,6 +47,8 @@ class PPR(Classifier):
 
 
             a = np.array(img_img_sim)
+
+
             ind = a.argsort()[-k:][::-1]
             normalized_sim_weight_lst = a[ind] / np.sum(a[ind])
 
@@ -57,42 +57,36 @@ class PPR(Classifier):
             for i, index in enumerate(ind):
                 self.transition[index][-1] = normalized_sim_weight_lst[i]
 
+
             self.transition = self.transition.T
+
 
             self.tele[-1] = 1
 
             self.pi_final = np.dot(np.linalg.inv(np.eye(len(self.tele)) - self.alpha * self.transition),
                                    (1 - self.alpha) * self.tele)
             self.pi_final = self.pi_final.reshape((1, -1))
+
+
+
             ind = self.pi_final[0].argsort()[-self.lk:][::-1]
 
-            if ind[0]==100:
+
+            if ind[0]==100 or ind[0] == len(self.image_list):
                 sum = 0
                 for index in ind[1:]:
                     if self.gt[index]:
                         sum += self.pi_final[0][index]
                     else:
                         sum += -self.pi_final[0][index]
-
-                '''c = Counter(np.array(self.gt)[ind[1:]])
-                result_list.append(c.most_common(1)[0][0])'''
                 result_list.append(True) if sum>=0 else result_list.append(False)
-
             else:
-                '''c = Counter(np.array(self.gt)[ind[:-1]])
-                result_list.append(c.most_common(1)[0][0])'''
-
                 sum = 0
                 for index in ind[:-1]:
-
                     if self.gt[index]:
                         sum += self.pi_final[0][index]
                     else:
                         sum += -self.pi_final[0][index]
-
-                '''c = Counter(np.array(self.gt)[ind[1:]])
-                result_list.append(c.most_common(1)[0][0])'''
-
                 result_list.append(True) if sum >= 0 else result_list.append(False)
         return result_list
 

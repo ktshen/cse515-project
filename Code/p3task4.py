@@ -14,8 +14,7 @@ from pathlib import Path
 Commandline for ppr
 python p3task4.py -c svm -meta phase3_sample_data/labelled_set1.csv -limg phase3_sample_data/Labelled/Set1/ -uimg phase3_sample_data/Unlabelled/Set\ 1/ -tmeta phase3_sample_data/Unlabelled/unlablled_set1.csv -m cm -t set1 -c ppr -ut set1 -sk 68 -lk 81
 
-python p3task4.py -c svm -meta phase3_sample_data/labelled_set2.csv -limg phase3_sample_data/Labelled/Set2/ -uimg phase3_sample_data/Unlabelled/Set\ 2/ -tmeta phase3_sample_data/Unlabelled/unlablled_set2.csv -m cm -t set2 -c ppr -ut set2 -sk 15 -lk 6
-
+python p3task4.py -c svm -meta phase3_sample_data/labelled_set2.csv -limg phase3_sample_data/Labelled/Set2/ -uimg phase3_sample_data/Unlabelled/Set\ 2/ -tmeta phase3_sample_data/Unlabelled/unlablled_set2.csv -m sift -t set2 -c ppr -ut set2 -lk 15 -sk 6
 '''
 
 
