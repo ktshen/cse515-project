@@ -19,6 +19,9 @@ Arguments:
 
 -test(optional) Test mode: The program will print the accuracy, the meta has to be the complete one.
 
+```shell
+python p3task1.py -p ~/hw/cse515_data/phase3_sample_data/Labelled/Set1 -unp ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1 -k 30 -t task12 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv
+```
 
 ### Task 2:
 
@@ -39,6 +42,11 @@ Arguments:
 -test(optional) Test mode: The program will print the accuracy, the meta has to be the complete one.
 
 -k(optional) # of latent semantics: The default value is 10. It is usually set in test mode to show the effect of k.
+
+```shell
+python p3task2.py -p ~/hw/cse515_data/phase3_sample_data/Labelled/Set1/ -unp ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1/ -k 50 -c 5 -t task12 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv
+```
+
 ### Task 3:
 
 Arguments:
@@ -53,6 +61,9 @@ Arguments:
 
 -lst ID1,ID2,ID3: The ID of 3 query images.
 
+```shell
+python p3task3.py -k 10 -lk 5 -t set2 -i ~/hw/cse515_data/phase3_sample_data/Labelled/Set2/ -lst Hand_0008333.jpg,Hand_0006183.jpg,Hand_0000074.jpg
+```
 
 ### Task 4:
 

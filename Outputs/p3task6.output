@@ -1,0 +1,48 @@
+Label the images as r(relevant), i(irrelevant) or ?(unknown)
+Hand_0000675 > r
+Hand_0000682 > r
+Hand_0000673 > r
+Hand_0000680 > r
+Hand_0000681 > r
+Hand_0000679 > r
+Hand_0000676 > r
+Hand_0000683 > r
+Hand_0000677 > r
+Hand_0000678 > i
+Hand_0001425 > i
+Hand_0000080 > i
+Hand_0001427 > i
+Hand_0001424 > i
+Hand_0002002 > i
+Hand_0002003 > i
+Hand_0004693 > i
+Hand_0004692 > i
+Hand_0004694 > i
+Hand_0000651 > i
+Doing dimension reduction on training data...
+Training classifier by training data...
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:00<00:00, 33789.61it/s]
+Doing dimension reduction on all images data...
+Predict all Image data by classifier
+Relevant image:
+Hand_0000675
+Hand_0000682
+Hand_0000673
+Hand_0000680
+Hand_0000681
+Hand_0000679
+Hand_0000676
+Hand_0000683
+Hand_0000677
+Hand_0000678
+Irrelevant images:
+Hand_0001425
+Hand_0000080
+Hand_0001427
+Hand_0001424
+Hand_0002002
+Hand_0002003
+Hand_0004693
+Hand_0004692
+Hand_0004694
+Hand_0000651

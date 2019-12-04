@@ -1,0 +1,31 @@
+Loading files to dataset...
+Scaling dataset...
+Using hog model with 9576 features
+Building structure...
+Creating 0-layer for current structure
+Creating 1-layer for current structure
+Creating 2-layer for current structure
+Creating 3-layer for current structure
+Creating 4-layer for current structure
+Getting 20 most similar images of Hand_0000674 from dataset...
+Total images considered: 11076
+No.1  Image ID: Hand_0000675  Distance: 20.8966938524936
+No.2  Image ID: Hand_0000682  Distance: 21.270668659326244
+No.3  Image ID: Hand_0000673  Distance: 22.111648237817295
+No.4  Image ID: Hand_0000680  Distance: 22.86453424562878
+No.5  Image ID: Hand_0000681  Distance: 23.69534598579896
+No.6  Image ID: Hand_0000679  Distance: 24.308361181697208
+No.7  Image ID: Hand_0000676  Distance: 24.566704077241415
+No.8  Image ID: Hand_0000683  Distance: 25.411416967668046
+No.9  Image ID: Hand_0000677  Distance: 25.895142607147992
+No.10  Image ID: Hand_0000678  Distance: 26.327726258108104
+No.11  Image ID: Hand_0001425  Distance: 29.400124312157466
+No.12  Image ID: Hand_0000080  Distance: 30.796559882329998
+No.13  Image ID: Hand_0001427  Distance: 31.831651360246966
+No.14  Image ID: Hand_0001424  Distance: 32.50286758683282
+No.15  Image ID: Hand_0002002  Distance: 32.887913709508275
+No.16  Image ID: Hand_0002003  Distance: 33.070728684187245
+No.17  Image ID: Hand_0004693  Distance: 33.13853828590758
+No.18  Image ID: Hand_0004692  Distance: 33.27944353958893
+No.19  Image ID: Hand_0004694  Distance: 33.37374544107426
+No.20  Image ID: Hand_0000651  Distance: 33.41970357310284

@@ -1,0 +1,1 @@
+python p3task6.py -c svm -m cavg -d pca -k 20 -t 11k

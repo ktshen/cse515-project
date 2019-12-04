@@ -1,2 +1,0 @@
- python p2task5.py -m hog -t test -k 5 -d svd -l l -meta HandInfo.csv -i Hand_0000002 >out_p2task5
-False

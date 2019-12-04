@@ -1,0 +1,1 @@
+python p3task3.py -k 10 -lk 5 -t set2 -i ~/hw/cse515_data/phase3_sample_data/Labelled/Set2/ -lst Hand_0008333.jpg,Hand_0006183.jpg,Hand_0000074.jpg

@@ -1,0 +1,1 @@
+python p3task1.py -p ~/hw/cse515_data/phase3_sample_data/Labelled/Set1 -unp ~/hw/cse515_data/phase3_sample_data/Unlabelled/Set\ 1 -k 30 -t task12 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv

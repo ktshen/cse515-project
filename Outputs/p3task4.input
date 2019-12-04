@@ -1,0 +1,1 @@
+python p3task4.py -c svm -m cavg -d pca -k 100 -t set1 -ut tset1 -meta ~/hw/cse515_data/phase3_sample_data/labelled_set1.csv -tmeta ~/hw/cse515_data/phase3_sample_data/Unlabelled/unlablled_set1.csv --svm_pretrained svm/svm_cavg_pca100_set1_tset1_85.0.pkl
