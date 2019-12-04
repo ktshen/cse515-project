@@ -131,6 +131,9 @@ python p3task4.py -c svm -m hog -t set1 -d pca -k 20 -ut tSet1 -meta ~/hw/cse515
 
 --visualize\_vector(*optional*): Visualize the feature vectors.
 
+```Shell
+python p3task5.py -l 5 -k 10 -t 20 -i Hand_0000674 -tb 11k -d hog -dir ~/hw/cse515_data/Hands/
+```
 
 ### Task 6:
 
