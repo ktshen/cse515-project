@@ -130,10 +130,13 @@ if decompMethod is not None and topk is not None:
 print("Training classifier by training data...")
 retrainData = np.array(retrainData)
 
-
 if args.classifier.lower() == "ppr":
     image_list = rIrFileIDList
     image_simlarity_dict = {}
+    if retrainData.shape[0] <= 10:
+        k = 9
+    else:
+        k = retrainData.shape[0]-1
 
     for i, feature in enumerate(retrainData):
         img_img_sim = []
@@ -141,15 +144,16 @@ if args.classifier.lower() == "ppr":
             img_img_sim.append(np.dot(feature, feature_p.T))
 
         a = np.array(img_img_sim)
-        ind = a.argsort()[-20:][::-1]
+        ind = a.argsort()[-k:][::-1]
 
         image_simlarity_dict[image_list[i]] = {
             "sim_weight": a[ind],
             "sim_node_index": ind,
         }
+
     classifier = Classifier.createClassifier(
         args.classifier.lower(),
-        **{"img_sim_graph": image_simlarity_dict, "image_list": image_list},
+        **{"img_sim_graph": image_simlarity_dict, "image_list": image_list}
     )
 else:
     classifier = Classifier.createClassifier(args.classifier.lower())
@@ -164,7 +168,12 @@ if decompMethod is not None and topk is not None:
 
 
 print("Predict all Image data by classifier")
-allImagePredictResult = classifier.predict(allImageData)
+
+if args.classifier.lower() == "ppr":
+    allImagePredictResult = classifier.predict(allImageData,k)
+else:
+
+    allImagePredictResult = classifier.predict(allImageData)
 
 relevantImages = []
 irrelevantImages = []

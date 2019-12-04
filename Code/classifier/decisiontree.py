@@ -7,7 +7,7 @@ class DecisionTree(Classifier):
         self._visualization = visualization
         
         self.max_depth = 3
-        self.min_size = 40
+        self.min_size = 10
         self.tree = None
         
         pass
