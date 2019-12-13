@@ -4,7 +4,7 @@ from .hog import HOG
 from .lbp import LocalBP
 from .cavg import ColorAvg
 
-MODELS = {"sift": SIFT, "cm": ColorMoments, "hog": HOG, "lbp": LocalBP, "cavg": ColorAvg}
+MODELS = {"cm": ColorMoments, "hog": HOG, "cavg": ColorAvg}
 
 
 def getSupportModel():

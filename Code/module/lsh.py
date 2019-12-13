@@ -80,7 +80,7 @@ class LSH:
         if len(candidates_with_distance) < t:
             print("Only get %s candidates, can't find other possible candidates." % len(candidates_with_distance))
         else:
-            print(f"Total images considered: {len(self.images)}")
+            print(f"Total images considered: {len(self.images)}  Unique images: {len(candidates_with_distance)}")
             candidates_with_distance = candidates_with_distance[:t]
 
         if visualize_vector:
